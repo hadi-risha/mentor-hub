@@ -1,0 +1,13 @@
+# Node.js
+node_modules/
+dist/
+build/
+
+# Environment Variables
+.env
+server/.env
+client/.env
+
+# Logs
+*.log
+
