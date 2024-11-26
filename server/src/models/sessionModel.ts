@@ -1,5 +1,14 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
+
+
+export interface IInstructor {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    image: { url: string };
+}
+
 export interface ISession extends Document {
     title: string;
     introduction: string;
@@ -13,7 +22,8 @@ export interface ISession extends Document {
         url: string | '';
       };
     
-    instructorId: Types.ObjectId;  
+      instructorId: Types.ObjectId | IInstructor;
+    category?: string;
 }
 
 
@@ -64,6 +74,31 @@ const sessionSchema: Schema<ISession> = new mongoose.Schema({
         ref: 'User',
         required: true 
     },
+
+    category: {
+        type: String,
+        enum: [
+          "Science",
+          "Technology",
+          "Engineering",
+          "Mathematics",
+          "History",
+          "Languages",
+          "Commerce",
+          "Economics",
+          "Business",
+          "Management",
+          "IT and Software",
+          "Finance",
+          "Accounting",
+          "Personal Development",
+          "Arts",
+          "Health and Wellness"
+        ],
+        required: false
+      },
+
+
 },{timestamps:true});
 
 

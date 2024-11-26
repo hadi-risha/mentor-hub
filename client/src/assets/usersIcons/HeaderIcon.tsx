@@ -21,7 +21,7 @@ export function PepiconsPopMenu(props: SVGProps<SVGSVGElement>) {
 }
 
 export function IconParkSolidDownOne(props: SVGProps<SVGSVGElement>) {
-	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48" {...props}><path fill="white" stroke="white" strokeLinejoin="round" strokeWidth={4} d="M36 19L24 31L12 19z"></path></svg>);
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1.3em" height="1.3em" viewBox="0 0 48 48" {...props}><path fill="white" stroke="white" strokeLinejoin="round" strokeWidth={4} d="M36 19L24 31L12 19z"></path></svg>);
 }
 
 export function RiLogoutCircleRLine(props: SVGProps<SVGSVGElement>) {

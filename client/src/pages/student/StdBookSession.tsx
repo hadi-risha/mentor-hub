@@ -225,11 +225,19 @@ const handleNextButtonClick = () => {
           <div className='w-4/12'>
 
               {/* BACK BUTTON */}
-              <Link to={`/student/session/${sessionId}`}>
+              {/* <Link to={`/student/session/${sessionId}`}>
                 <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:bg-gray-200 hover:border-blue-700 flex items-center justify-center'>
                   <BitcoinIconsArrowLeftFilledBlack className='' /> 
                 </div>
-              </Link>
+              </Link> */}
+
+
+                <Link to={`/student/session/${sessionId}`}>
+                    <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                        <span className="text-black text-xl">←</span>
+                    </div>
+                </Link>
+
 
 
               <div className='pt-10 pr-5 bg-white w-full h-1/2 rounded-bl-md rounded-br-md'>
@@ -238,32 +246,34 @@ const handleNextButtonClick = () => {
                     alt={session?.title}
                     className=' w-12 h-12 object-cover rounded-full' 
                   />    
-                  <p className='mt-3 text-sm text-blue-950'>@{session?.instructorId.firstName} {session?.instructorId.lastName}</p>
-                  <p className='mt-3 text-black font-medium'>{session?.title}</p>
+                  <p className='mt-3 text-lg text-blue-950 font-serif'>@{session?.instructorId.firstName} {session?.instructorId.lastName}</p>
+                  <p className='mt-3 text-black text-lg font-normal'>{session?.title}</p>
 
 
                   <div className='flex mt-7 space-x-2 '>
-                      <MdiClockOutline />
+                      {/* <MdiClockOutline /> */}
+                      <p className='text-blue-950 text-lg font-medium font-serif -mt-1'>Duration: </p>
                       <p className='text-blue-950 text-lg font-medium font-serif -mt-1'>
                         {session?.duration ? formatDuration(session.duration) : 'N/A'}
                       </p>
                   </div>
 
                   <div className='flex mt-3 space-x-2'>
-                      <BiCashStack  />
+                      {/* <BiCashStack  /> */}
+                      <p className='text-blue-950 text-lg font-medium font-serif -mt-1'>Fees: </p>
                       <p className='text-blue-950 text-lg font-medium font-serif -mt-1'>₹{session?.fee}</p>
                   </div>
 
                   
                   <div className='pt-12  font-normal'>
-                        <p className='text-black'>In this session you can expect:</p>
+                        <p className='text-black text-base'>In this session you can expect:</p>
 
                         <div className='mt-3'>
                             <div className='flex space-x-4'>
                                 <p className='text-black'>1.</p>
-                                <p className='text-blue-950 text-sm font-semibold'>{session?.descriptionTitle}:</p>
+                                <p className='text-blue-950 text-base font-serif'>{session?.descriptionTitle}:</p>
                             </div>
-                            <p className='text-gray-600 text-sm ml-8 pr-3'>{session?.description}</p>
+                            <p className='text-gray-600 text-sm ml-7 pr-6 mt-2'>{session?.description}</p>
                         </div>
                   </div>
                   
@@ -278,105 +288,90 @@ const handleNextButtonClick = () => {
 
 
           {/* RIGHT SIDE */}
-          <div className=' flex-grow pl-6'>
+          <div className=' flex-grow pl-10'>
 
-            <p className='text-black font-bold  text-lg'>Select a Date & Time</p>
+            <p className='mt-5 ml-3 text-black font-bold text-lg font-serif'>Select a Date & Time</p>
             
 
-          <div className='flex w-full'>
+            <div className='flex w-full'>
 
+                {/* **********calendar div********** */}
+                <div className='w-8/12'>
+                    <div className="ml-12 mb-4 mt-20 flex space-x-14 font-sans">
+                        <div className='w-10 h-10 rounded-full cursor-pointer  hover:border hover:border-blue-700 flex items-center justify-center'>
+                            <button onClick={handlePrevMonth}><UiwLeft /> </button>
+                        </div>
+                        <p className='text-gray-500 text-lg font-normal'>{formattedMonthYear}</p> {/* Display month and year */}
+                        <div className=' w-10 h-10 rounded-full cursor-pointer hover:border hover:border-blue-700 flex items-center justify-center'>
+                            <button onClick={handleNextMonth}><UiwRight /> </button>
+                        </div>
+                    </div>
 
-            {/* **********calendar div********** */}
-            <div className=' w-8/12'>
-              <div className=" flex space-x-14 ml-12 mb-4 mt-6 font-sans">
-
-                <div className='w-10 h-10 rounded-full cursor-pointer  hover:border hover:border-blue-700 flex items-center justify-center'>
-                  <button onClick={handlePrevMonth}><UiwLeft /> </button>
-                </div>
-
-                <p className='text-gray-500 text-lg font-normal'>{formattedMonthYear}</p> {/* Display month and year */}
-
-                <div className=' w-10 h-10 rounded-full cursor-pointer hover:border hover:border-blue-700 flex items-center justify-center'>
-                  <button onClick={handleNextMonth}><UiwRight /> </button>
-                </div>
-
-              </div>
-
-              <table className='border-collapse border-spacing-0'>
-                <thead>
-                  <tr className='text-black font-light '>
-                    <th className='text-sm font-normal px-4'>MON</th>
-                    <th className='text-sm font-normal px-4'>TUE</th>
-                    <th className='text-sm font-normal px-4'>WED</th>
-                    <th className='text-sm font-normal px-4'>THU</th>
-                    <th className='text-sm font-normal px-6'>FRI</th>
-                    <th className='text-sm font-normal px-4'>SAT</th>
-                    <th className='text-sm font-normal px-5'>SUN</th>
-                  </tr>
-                </thead>
-                <tbody className='text-black'>
-                  <div className='w-11 h-11  rounded-full'>
-                    {/* {generateCalendar(selectedDate.getMonth(), selectedDate.getFullYear())} */}
-                    {generateCalendar(selectedDate.getMonth(), selectedDate.getFullYear(), selectedDate, handleDateSelection)}
-
-
-                  </div>
-
-
-                  </tbody>
-              </table>
-            </div>
-            {/* **********end of calendar div********** */}
-
-
-            <div className=' w-4/12 mt-7 ml-11'>
-                  <p className='text-gray-500  font-normal'>Friday, November 27</p>
-
-
-                      <div className="mt-8">
-                        {sortedTimeSlots.map((timeSlot, index) => {
-                          const isSelected = timeSlot === selectedTimeSlot;  // Check if the time slot is selected
-                          return (
-                            <div
-                              key={timeSlot}
-                              className={`w-8/12 h-9 mt-3 border border-blue-500 rounded-sm flex items-center justify-center cursor-pointer ${
-                                isSelected ? 'bg-blue-200' : 'bg-white' // Apply rose color if selected
-                              }`}
-                              onClick={() => handleTimeSlotSelection(timeSlot)}
-                            >
-                              <p className={`font-medium ${isSelected ? 'text-black' : 'text-blue-600'}`}>
-                                {formatTime(timeSlot)} {/* Format the time if necessary */}
-                              </p>
+                    <table className='border-collapse border-spacing-0'>
+                        <thead>
+                            <tr className='text-black font-light '>
+                                <th className='text-sm font-normal px-4'>MON</th>
+                                <th className='text-sm font-normal px-4'>TUE</th>
+                                <th className='text-sm font-normal px-4'>WED</th>
+                                <th className='text-sm font-normal px-4'>THU</th>
+                                <th className='text-sm font-normal px-6'>FRI</th>
+                                <th className='text-sm font-normal px-4'>SAT</th>
+                                <th className='text-sm font-normal px-5'>SUN</th>
+                            </tr>
+                        </thead>
+                        <tbody className='text-black'>
+                            <div className='w-11 h-11  rounded-full'>
+                                {/* {generateCalendar(selectedDate.getMonth(), selectedDate.getFullYear())} */}
+                                {generateCalendar(selectedDate.getMonth(), selectedDate.getFullYear(), selectedDate, handleDateSelection)}
                             </div>
-                          );
+                        </tbody>
+                    </table>
+                </div>
+                {/* **********end of calendar div********** */}
+
+
+                <div className=' w-4/12 mt-20 ml-11'>
+                    <p className='text-gray-500 font-normal'>Available Time slots</p>
+
+                    <div className="mt-8">
+                        {sortedTimeSlots.map((timeSlot, index) => {
+                        const isSelected = timeSlot === selectedTimeSlot;  // Check if the time slot is selected
+                        return (
+                        <div
+                            key={timeSlot}
+                            className={`w-8/12 h-9 mt-3 border border-blue-500 rounded-sm flex items-center justify-center cursor-pointer ${
+                            isSelected ? 'bg-[#f3d281]' : 'bg-white' // Apply rose color if selected
+                            }`}
+                            onClick={() => handleTimeSlotSelection(timeSlot)}
+                        >
+                            <p className={`font-medium ${isSelected ? 'text-black' : 'text-blue-600'}`}>
+                            {formatTime(timeSlot)} {/* Format the time if necessary */}
+                            </p>
+                        </div>
+                        );
                         })}
-                      </div>
+                    </div>
+                </div>
 
-                
             </div>
-
-            
-          </div>
 
           
-          {/* show selected date and time */}
-          {/* <div className="mt-40">
-            <p className="text-black font-medium">Selected Date: {selectedDate.toDateString()}</p>
-            <p className="text-black font-medium">Selected Time Slot: {selectedTimeSlot || 'Not selected'}</p>
-          </div> */}
+            {/* show selected date and time */}
+            {/* <div className="mt-40">
+                <p className="text-black font-medium">Selected Date: {selectedDate.toDateString()}</p>
+                <p className="text-black font-medium">Selected Time Slot: {selectedTimeSlot || 'Not selected'}</p>
+            </div> */}
 
-
-          <button 
-            onClick={() => {
-              if (session?._id) {
-                  handleNextButtonClick()
-                  // handleButtonClick(session._id); // Pass the id only if it's defined
-              }
-            }}
-            className='bg-blue-500 py-1  px-9 rounded-sm mt-36 ml-60'
-          >
-            Next
-          </button>
+            <button 
+                onClick={() => {
+                    if (session?._id) {
+                        handleNextButtonClick()
+                    }
+                }}
+                className='bg-[#3ee1a6] py-1 px-9 text-black font-medium border border-black rounded-full mt-56 ml-60 hover:bg-[#fbcfb1;]'
+            >
+                Next
+            </button>
             
 
 

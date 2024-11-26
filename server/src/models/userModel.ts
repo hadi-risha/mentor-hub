@@ -26,6 +26,7 @@ export interface IUser extends Document {
   };
 
   isBlocked?: boolean;
+  
 
 }
 

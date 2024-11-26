@@ -31,7 +31,7 @@ export const generateCalendar = (month: number, year: number, selectedDate: Date
             key={i} 
             // className={`border-none px-3 py-2 cursor-pointer ${isToday ? ' text-red-500' : isPastDay ? 'text-gray-400 ' : ''}`}
 
-            className={`border-none px-3 py-2 cursor-pointer ${isToday ? ' text-red-500' : isPastDay ? 'text-gray-400 ' : ''} ${isSelected ? 'bg-blue-200' : ''}`}
+            className={`border-none px-3 py-2 cursor-pointer ${isToday ? ' text-red-500' : isPastDay ? 'text-gray-400 ' : ''} ${isSelected ? 'bg-[#f3d281]' : ''}`}
             onClick={() => setSelectedDate(currentDate)} // Handle date click
 
             >

@@ -4,16 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom'; 
 import axiosInstance from '../../utils/users/axiosInstance';
 
-
-
-
-
-
-
 const UpdateSession = () => {
 
     const { sessionId } = useParams(); 
-    // const sessionId = '6738cb1b64e0d66fc997428e';
 
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -374,62 +367,57 @@ const UpdateSession = () => {
 
   return (
     <>
-      <div className='w-screen h-auto bg-slate-200 overflow-x-hidden'>
+      <div className='w-screen h-auto bg-white overflow-x-hidden'>
 
 
         {/* white parent div */}
-            <div className='bg-white w-9/12 h-auto mb-11 ml-44 mt-6 rounded-2xl shadow-2xl shadow-slate-400 flex flex-col'>
+        <div className='ml-64 mt-10 mb-20 pl-10 pt-10 pb-10 bg-white w-8/12 h-auto  rounded-2xl shadow-2xl shadow-[#c3e3d7] flex flex-col'>
 
-                <div className='bg-blue-950 w-full h-24 rounded-tl-3xl rounded-tr-3xl pt-5 pl-2 flex  items-center space-x-80'>
-
-                
+                <div className='flex items-center space-x-72'>
                   <Link to="/instructor/sessions">
-                    <div className=' border w-10 h-10 -mt-14 rounded-full cursor-pointer hover:bg-gray-400 hover:border-none flex items-center justify-center'>
-                        <BitcoinIconsArrowLeftFilled className='' />
+                    <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                        <span className="text-black text-xl">←</span>
                     </div>
-                    </Link>
-
-                    <div className='flex'> 
-
-                      <div className='ml-20 '>
-                        <h1 className='font-bold text-xl'>Update Session</h1>
-                      </div>
-                    </div> 
+                  </Link>
+                  <div className='text-black'> 
+                      <h1 className='font-semibold text-xl font-serif'>Update Session</h1>
+                  </div> 
                 </div> 
 
 
-                <div className='space-y-7 pt-7 flex-grow rounded-bl-3xl rounded-br-3xl'>
+                <div className=' space-y-7 pt-14 flex-grow rounded-bl-3xl rounded-br-3xl'>
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Session Title</p>
-                    <input type="text" 
-                      placeholder='Title' 
-                      name="title" 
-                      value={sessionData.title} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs pl-2' />
+                  <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>Session Title</p>
+                    <input 
+                        type="text" 
+                        placeholder='Title' 
+                        name="title" 
+                        value={sessionData.title} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
                   </div>
-                  <hr />
+                  <hr className='ml-60 mr-48 text-black ' />
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Session Overview</p>
-                    <input type="text" 
-                      placeholder='Introduction' 
-                      name="introduction" 
-                      value={sessionData.introduction} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs pl-2' />
+
+
+                  <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>Session Overview</p>
+                    <input 
+                        type="text" 
+                        placeholder='Introduction' 
+                        name="introduction" 
+                        value={sessionData.introduction} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
                   </div>
-                  <hr />
-                  
+                  <hr className='ml-60 mr-48 text-black ' />
 
-                  {/* <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Session Duration</p>
-                    <input type="text" placeholder='Duration' className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div> */}
+
+
 
                   <div className='flex w-full ml-64 h-7 space-x-28'>
-                      <p className='text-black font-bold text-sm'>Session Duration</p>
+                      <p className='w-1/12 text-black font-bold text-sm font-serif'>Session Duration</p>
 
                       <div className='flex items-center space-x-2'>
                         
@@ -458,57 +446,60 @@ const UpdateSession = () => {
                         />
                       </div>
                     </div>
-                  <hr />
+                    <hr className='ml-60 mr-48 text-black ' />
 
+
+
+
+
+                  <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>Session Fee</p>
+                    <input 
+                        type="text" 
+                        placeholder='Fee' 
+                        name="introduction" 
+                        value={sessionData.fee} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
+                  </div>
+                  <hr className='ml-60 mr-48 text-black ' />
 
                   
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Session Fee</p>
-                    <input type="text" 
-                      placeholder='Fee' 
-                      name="fee" 
-                      value={sessionData.fee} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div>
-                  <hr />
-
-                  
-
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Description Title</p>
+                  <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>Description Title</p>
                     <input 
-                      type="text" 
-                      placeholder='Description Title' 
-
-                      name="descriptionTitle" 
-                      value={sessionData.descriptionTitle} 
-                      onChange={handleChange} 
-
-
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
+                        type="text" 
+                        placeholder='Description Title' 
+                        name="descriptionTitle" 
+                        value={sessionData.descriptionTitle} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
                   </div>
-                  <hr />
+                  <hr className='ml-60 mr-48 text-black ' />
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Session Description</p>
+
+
+
+                  <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>Session Description</p>
                     <input 
-                      type="text" 
-                      placeholder='Description' 
-
-                      name="description" 
-                      value={sessionData.description} 
-                      onChange={handleChange} 
-
-
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
+                        type="text" 
+                        placeholder='Description' 
+                        name="description" 
+                        value={sessionData.description} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
                   </div>
-                  <hr />
+                  <hr className='ml-60 mr-48 text-black ' />
+
+
+
+
 
                   <div className='flex w-full ml-64 h-7 space-x-20'>
                     <div className='space-y-2'>
-                      <p className='text-black font-bold text-sm'>Cover image</p>
+                      <p className='text-black font-bold text-sm font-serif'>Cover image</p>
                       {/* <p className='text-gray-500 font-normal text-xs'>Update your Photo</p> */}
                     </div>
 
@@ -518,11 +509,11 @@ const UpdateSession = () => {
                       {/* Display Image Preview */}{/* Display profile picture if it exists */}
                       {sessionData.coverImage || imagePreview ? (
                         <img src={imagePreview || sessionData.coverImage}
-                          alt="Profile Preview" className="w-11 h-11 object-cover rounded-lg"
+                          alt="Profile Preview" className="ml-6 w-11 h-11 object-cover rounded-lg"
                         />
                       ) : (
                         <div
-                          className="w-11 h-11 flex items-center justify-center bg-black rounded-full cursor-pointer relative"
+                          className="ml-7 w-11 h-11 flex items-center justify-center bg-black rounded-full cursor-pointer relative"
                           onClick={() => fileInputRef.current && fileInputRef.current.click()} // Trigger file input on click
                         >
                           <FaCamera className="text-white" />
@@ -542,14 +533,15 @@ const UpdateSession = () => {
                       {(sessionData.coverImage || imagePreview) && (
                         <button
                           onClick={handleDeleteImage}
-                          className="text-gray-500 font-bold text-xs "
+                          className="text-red-500 font-bold text-xs "
                         > Delete </button>
                       )}
                     </div>
 
 
                   </div>
-                  <hr />
+                  <hr className='ml-60 mr-48 text-black ' />
+
 
 
 
@@ -557,46 +549,44 @@ const UpdateSession = () => {
 
 
                   {/* Time Slot Section */}
-                    <div className='flex w-full ml-64 h-7 space-x-28'>
-                        <p className='text-black font-bold text-sm'>Add Time Slots</p>
+                    <div className='flex w-full ml-64 h-7'>
+                        <p className='text-black font-bold text-sm font-serif'>Add Time Slots</p>
                         <input
                             type="time"
                             value={newTimeSlot}
                             onChange={(e) => setNewTimeSlot(e.target.value)}
                             placeholder="hr : min : sec"
-                            className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2'
+                            className='ml-20 py-4 px-2 w-4/12 text-sm border border-gray-300 rounded-md text-black placeholder:text-xs'
                         />
-                        <button onClick={addTimeSlot} className='bg-blue-800 h-7 px-3 rounded-md text-white text-sm'>Add</button>
+                        <button onClick={addTimeSlot} className='ml-5 bg-blue-800 h-7 px-3 rounded-md text-white text-sm'>Add</button>
                     </div>
 
                     {/* Display Added Time Slots */}
                     <div className='ml-64 mt-4 space-y-2'>
                         {timeSlots.length > 0 && ( 
-                            <>
-                            <p className='text-blue-800 font-bold text-sm'>Scheduled Times</p>
-                            <hr className='w-32'/>
-                            <ul className='list-disc ml-8'>
-                                {timeSlots.map((time, index) => (
-                                <li key={index} className='flex items-center space-x-6'>
-                                    <span className='text-black text-sm -ml-9'>
-                                    {convertRailwayTimeTo12Hour(time)}
-                                    </span>
-                                    <button onClick={() => removeTimeSlot(index)} className='text-red-500 text-xs font-bold'>
-                                    Remove
-                                    </button>
-                                </li>
-                                ))}
-                            </ul>
-                            </>
+                            <div className='p-3 h-auto w-48 rounded-lg shadow space-y-3'>
+                              <p className='text-blue-800 font-bold text-sm '>Scheduled Times</p>
+                              <hr className='w-32'/>
+                              <ul className='list-disc ml-8'>
+                                  {timeSlots.map((time, index) => (
+                                  <li key={index} className='flex items-center space-x-6'>
+                                      <span className='text-black text-sm -ml-9'>
+                                      {convertRailwayTimeTo12Hour(time)}
+                                      </span>
+                                      <button onClick={() => removeTimeSlot(index)} className='text-red-500 text-xs font-bold'>
+                                      Remove
+                                      </button>
+                                  </li>
+                                  ))}
+                              </ul>
+                            </div>
                         )}
                     </div>
-                    <hr />
+                    <hr className='ml-60 mr-48 text-black ' />
 
                   
 
-                  <div className='flex justify-center'>
-                        <button className='mb-8 bg-primary-orange h-8 px-9 rounded-md' onClick={handleSave}>Save</button>
-                  </div>
+                  
 
 
 
@@ -604,6 +594,14 @@ const UpdateSession = () => {
                   
 
                 </div>
+
+                {/* <div className='flex justify-center'>
+                        <button className='mb-8 bg-primary-orange h-8 px-9 rounded-md' onClick={handleSave}>Save</button>
+                  </div> */}
+
+                <button className='mt-14 ml-96 w-32 text-black border border-black bg-[#3ee1a6] hover:bg-primary-orange h-8 px-4 rounded-full mr-10' onClick={handleSave}>
+                    Save
+                </button>
 
             </div>
 

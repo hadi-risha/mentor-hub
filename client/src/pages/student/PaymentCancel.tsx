@@ -15,8 +15,8 @@ const PaymentCancel: React.FC = () => {
 
   return (
     <>
-      <div className="w-screen h-screen bg-slate-100 flex justify-center items-center -mt-11">
-        <div className="text-center space-y-3">
+      <div className="w-screen h-screen bg-white flex justify-center items-center -mt-11">
+        <div className="px-16 py-20 rounded-2xl text-center space-y-3 shadow-lg">
           <SystemUiconsCrossCircle className='ml-28' />
           <h1 className="text-black font-bold text-md">Payment Failed!</h1>
           <p className="text-black font-light text-sm">Oops! Something went wrong with your payment. Please try again.</p>

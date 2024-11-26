@@ -45,3 +45,8 @@ export function CharmCircleTick(props: SVGProps<SVGSVGElement>) {
 export function SystemUiconsCrossCircle(props: SVGProps<SVGSVGElement>) {
 	return (<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 21 21" {...props}><g fill="none" fillRule="evenodd" stroke="#f52e2e" strokeLinecap="round" strokeLinejoin="round" transform="translate(2 2)"><circle cx={8.5} cy={8.5} r={8}></circle><path d="m5.5 5.5l6 6m0-6l-6 6"></path></g></svg>);
 }
+
+
+export function EpSuccessFilled(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="4em" height="4em" viewBox="0 0 1024 1024" {...props}><path fill="#2ecc19" d="M512 64a448 448 0 1 1 0 896a448 448 0 0 1 0-896m-55.808 536.384l-99.52-99.584a38.4 38.4 0 1 0-54.336 54.336l126.72 126.72a38.27 38.27 0 0 0 54.336 0l262.4-262.464a38.4 38.4 0 1 0-54.272-54.336z"></path></svg>);
+}

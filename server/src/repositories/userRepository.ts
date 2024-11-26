@@ -117,12 +117,17 @@ export class UserRepository implements IUserRepository {
             return await SessionModel.findById(id)
             .populate({
                 path: 'instructorId',
-                select: 'firstName lastName image.url', // Only fetch the required fields
+                select: '_id firstName lastName image.url', // Only fetch the required fields
             });
         } catch (error) {
             throw new Error(`Error finding session by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
+
+
+
+
+    
 
 
     async updateSessionDetails(sessionData: ISession): Promise<ISession> {
@@ -203,7 +208,7 @@ export class UserRepository implements IUserRepository {
             })
             .populate({
                 path: 'sessionId', // Populate session details
-                select: '_id title duration fee descriptionTitle', // Fetch required fields
+                select: '_id title duration fee descriptionTitle coverImage.url', // Fetch required fields
             });
 
         } catch (error) {

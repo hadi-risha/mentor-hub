@@ -5,7 +5,7 @@ import { log } from 'winston';
 import config from '../config/config';
 import { HttpStatus } from '../utils/httpStatusCodes';
 import mongoose from 'mongoose';
-import { ISession } from '../models/sessionModel';
+import { IInstructor, ISession } from '../models/sessionModel';
 
 
 
@@ -247,8 +247,20 @@ export const getSession = async (req: Request, res: Response): Promise<Response>
           return res.status(HttpStatus.NOT_FOUND).json({ message: "Session not found" });
       }
       console.log("session info:- ", session);
+      // console.log("session info instructorId:- ", session.instructorId?.firstName, session.instructorId?.lastName, session.instructorId?.image.url);
+
+
+      // _id firstName lastName image.url
+      console.log(
+        "session info instructorId:- *******************************************",
+        (session.instructorId as IInstructor)?.firstName,
+        (session.instructorId as IInstructor)?.lastName,
+        (session.instructorId as IInstructor)?.image.url,
+        (session.instructorId as IInstructor)?._id
+      );
     
       const sessionData = {
+        id: session._id,
         title: session.title,
         introduction: session.introduction,
         duration: session.duration,
@@ -258,6 +270,11 @@ export const getSession = async (req: Request, res: Response): Promise<Response>
         timeSlots: session.timeSlots,
         sessionimgUrl: session.coverImage?.url ? session.coverImage?.url : null,
         sessionimgKey: session.coverImage?.key ? session.coverImage?.key : null,
+
+        instructorId: (session.instructorId as IInstructor)?._id,
+        firstName: (session.instructorId as IInstructor)?.firstName,
+        lastName: (session.instructorId as IInstructor)?.lastName,
+        instructorImg: (session.instructorId as IInstructor)?.image.url,
       };
       console.log("sessionData:- ", sessionData);
 

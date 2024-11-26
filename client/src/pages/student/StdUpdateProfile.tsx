@@ -5,7 +5,7 @@ import axiosInstance from '../../utils/users/axiosInstance'
 import { useNavigate, Link } from 'react-router-dom';
 
 
-const StudentUpdateProfile = () => {
+const UpdateProfile = () => {
 
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Ref for file input
@@ -167,155 +167,147 @@ const StudentUpdateProfile = () => {
 
   return (
     <>
-      <div className='w-screen h-auto bg-slate-200 overflow-x-hidden'>
+      <div className='w-screen h-auto bg-white overflow-x-hidden'>
 
 
         {/* white parent div */}
-            <div className='bg-white w-9/12 h-5/6 ml-44 mt-6 rounded-2xl shadow-2xl shadow-slate-400 flex flex-col'>
+            <div className='ml-64 mt-10 mb-20 pl-10 pt-10 pb-10 bg-white w-8/12 h-auto  rounded-2xl shadow-2xl shadow-[#c3e3d7] flex flex-col'>
 
-                <div className='bg-blue-950 w-full h-1/6 rounded-tl-3xl rounded-tr-3xl pt-5 pl-2 flex justify-between items-center'>
+                <div className='flex items-center space-x-72'>
                     <Link to="/student/profile">
-                      <div className=' border w-10 h-10 -mt-14 rounded-full cursor-pointer hover:bg-gray-400 hover:border-none flex items-center justify-center'>
-                          <BitcoinIconsArrowLeftFilled className='' />
-                      </div>
+                        <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                            <span className="text-black text-xl">←</span>
+                        </div>
                     </Link>
 
-                    <div className='flex'> 
-                      <FaUserCircle className='w-11 h-11 text-gray-500' />
-
-                      <div className='ml-7 '>
-                        <h1 className='font-bold text-xl'>Profile</h1>
-                        <p className=' text-sm'>Update Your personal details</p>
-                      </div>
+                    <div className='text-black'> 
+                        <h1 className='font-semibold text-xl font-serif'>Update Profile</h1>
                     </div> 
-
-                    <button className='bg-primary-orange h-8 px-4 rounded-sm mr-10' onClick={handleSave}>Save</button>
                 </div> 
 
 
-                <div className=' space-y-7 pt-7 flex-grow rounded-bl-3xl rounded-br-3xl'>
-
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>First Name</p>
+                <div className=' space-y-7 pt-14 flex-grow rounded-bl-3xl rounded-br-3xl'>
+                
+                
+                    <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-semibold text-sm font-serif'>First Name</p>
                     <input 
-                      type="text" 
-                      placeholder='First Name' 
-                      name="firstName" 
-                      value={profileData.firstName} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs pl-2' />
-                  </div>
-                  <hr />
-                  
-
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Last Name</p>
-                    <input 
-                      type="text" 
-                      placeholder='Last Name' 
-                      name="lastName" 
-                      value={profileData.lastName} 
-                      onChange={handleChange}
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div>
-                  <hr />
-
-
-                  <div className='flex w-full ml-64 h-7 space-x-20'>
-                    <div className='space-y-2'>
-                      <p className='text-black font-bold text-sm'>Your Photo</p>
-                      <p className='text-gray-500 font-normal text-xs'>Update your Photo</p>
+                        type="text" 
+                        placeholder='First Name' 
+                        name="firstName" 
+                        value={profileData.firstName} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md w-4/12 text-black text-sm placeholder:text-xs px-2' />
+                        {/* <hr className="border-black border-t-2 w-full" /> */}
                     </div>
+                    <hr className='ml-60 mr-48 text-black ' />
+                    
+                    
+
+                    <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-bold text-sm font-serif'>Last Name</p>
+                    <input 
+                        type="text" 
+                        placeholder='Last Name' 
+                        name="lastName" 
+                        value={profileData.lastName} 
+                        onChange={handleChange}
+                        className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs px-2' />
+                    </div>
+                    <hr className='ml-60 mr-48 text-black ' />
 
 
+                    <div className='flex w-full ml-64 h-10 space-x-20'>
+                      <div className='space-y-2'>
+                          <p className='text-black font-bold text-sm font-serif'>Your Photo</p>
+                          <p className='text-gray-500 font-normal text-xs'>Update your Photo</p>
+                      </div>
 
-                    <div className="flex space-x-8 items-center">
-                      {/* Display Image Preview */}{/* Display profile picture if it exists */}
-                      {profileData.profilePic || imagePreview ? (
+                      <div className="flex space-x-8 items-center">
+                        {profileData.profilePic || imagePreview ? (
                         <img src={imagePreview || profileData.profilePic}
-                          alt="Profile Preview" className="w-11 h-11 object-cover rounded-lg"
+                            alt="Profile Preview" className="w-11 h-11 object-cover rounded-lg"
                         />
-                      ) : (
+                        ) : (
                         <div
-                          className="w-11 h-11 flex items-center justify-center bg-black rounded-full cursor-pointer relative"
-                          onClick={() => fileInputRef.current && fileInputRef.current.click()} // Trigger file input on click
+                            className="w-11 h-11 flex items-center justify-center bg-black rounded-full cursor-pointer relative"
+                            onClick={() => fileInputRef.current && fileInputRef.current.click()} 
                         >
-                          <FaCamera className="text-white" />
+                            <FaCamera className="text-white" />
                         </div>
-                      )}
+                        )}
 
-                      {/* File Input */}
-                      <input
+                        <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        ref={fileInputRef} // Attach ref
+                        ref={fileInputRef} 
                         className="opacity-0 absolute inset-0 w-11 h-11 cursor-pointer"
-                      />
+                        />
 
-                      {/* Delete Button */}
-                      {(profileData.profilePic || imagePreview) && (
+                        {(profileData.profilePic || imagePreview) && (
                         <button
-                          onClick={handleDeleteImage}
-                          className="text-gray-500 font-bold text-xs "
+                            onClick={handleDeleteImage}
+                            className="text-red-500 font-bold text-xs "
                         > Delete </button>
-                      )}
+                        )}
+                      </div>
+
+
                     </div>
+                    <hr className='ml-60 mr-48 text-black ' />
 
 
-                  </div>
-                  <hr />
-
-
-
-                  
-
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>About You</p>
+                    <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-bold text-sm font-serif'>About You</p>
                     <input 
-                      type="text" 
-                      placeholder='About' 
-                      name="about" 
-                      value={profileData.about} 
-                      onChange={handleChange}
-                    className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div>
-                  <hr />
+                        type="text" 
+                        placeholder='About' 
+                        name="about" 
+                        value={profileData.about} 
+                        onChange={handleChange}
+                    className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs px-2' />
+                    </div>
+                    <hr className='ml-60 mr-48 text-black ' />
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Education</p>
+
+                    <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-bold text-sm font-serif'>Education</p>
                     <input 
-                      type="text" 
-                      placeholder='Education' 
-                      name="education" 
-                      value={profileData.education} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div>
-                  <hr />
+                        type="text" 
+                        placeholder='Education' 
+                        name="education" 
+                        value={profileData.education} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs px-2' />
+                    </div>
+                    <hr className='ml-60 mr-48 text-black ' />
 
-                  <div className='flex w-full ml-64 h-7 space-x-28'>
-                    <p className='text-black font-bold text-sm'>Country</p>
+
+                    <div className='flex w-full ml-64 h-10 space-x-28'>
+                    <p className='w-1/12 text-black font-bold text-sm font-serif'>Country</p>
                     <input 
-                      type="text" 
-                      placeholder='Country' 
-                      name="country" 
-                      value={profileData.country} 
-                      onChange={handleChange} 
-                      className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs pl-2' />
-                  </div>
+                        type="text" 
+                        placeholder='Country' 
+                        name="country" 
+                        value={profileData.country} 
+                        onChange={handleChange} 
+                        className='border border-gray-300 rounded-md text-black text-sm w-4/12 placeholder:text-xs px-2' />
+                    </div>
+                    <hr className='ml-60 mr-48 text-black ' />
 
-                  
 
                 </div>
 
+                <button className='mt-14 ml-96 w-32 text-black border border-black bg-[#3ee1a6] hover:bg-primary-orange h-8 px-4 rounded-full mr-10' onClick={handleSave}>
+                  Save
+                </button>
+
             </div>
-
-
 
       </div>
     </>
   )
 }
 
-export default StudentUpdateProfile;
+export default UpdateProfile;
