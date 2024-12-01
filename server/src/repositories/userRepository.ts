@@ -276,5 +276,27 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+
+    async searchSessions(query: string): Promise<ISession[] | null> {
+        try {
+          const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex for partial matches
+          return await SessionModel.find({
+            $or: [
+              { title: searchRegex },
+              { description: searchRegex },
+              { "instructorId.firstName": searchRegex },
+              { "instructorId.lastName": searchRegex },
+              { "category": searchRegex }
+            ],
+          })
+            .populate({
+              path: 'instructorId',
+              select: 'firstName lastName email', // Fetch required instructor fields
+            })
+            .sort({ createdAt: -1 }); // Sort results by creation date
+        } catch (error) {
+          throw new Error(`Failed to perform search: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
     
 }

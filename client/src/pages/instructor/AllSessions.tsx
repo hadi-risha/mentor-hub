@@ -1,34 +1,26 @@
-import { TypcnUserAdd, PrimeStarFill, AntDesignMessageFilled, FluentNotepadEdit16Filled, TeenyiconsUpSolid, SolarMenuDotsBold, MaterialSymbolsAdd } from '../../assets/usersIcons/ProfileIcons'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../../utils/users/axiosInstance'
 import { useNavigate } from 'react-router-dom';
-import { FaUserCircle } from 'react-icons/fa';
-import Modal from '../../utils/users/userLogout';
-
-
-
-
 
 interface ISession {
+  _id: string;
+  title: string;
+  introduction: string;
+  duration: string;
+  fee: number;
+  descriptionTitle: string;
+  description: string;
+  timeSlots: string[];
+  coverImage: {
+    key: string | '';
+    url: string | '';
+  };
+  instructorId: {
     _id: string;
-    title: string;
-    introduction: string;
-    duration: string;
-    fee: number;
-    descriptionTitle: string;
-    description: string;
-    timeSlots: string[];
-    coverImage: {
-        key: string | '';
-        url: string | '';
-      };
-    instructorId: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-    };
+    firstName: string;
+    lastName: string;
+  };
 }
-
 
 interface IBooking {
   _id: string;
@@ -51,7 +43,6 @@ interface IBooking {
   date: string;
   timeSlot: string;
   status: string;
-
 }
 
 

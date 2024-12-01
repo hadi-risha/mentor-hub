@@ -138,78 +138,8 @@ const handleConcernsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 
 
 
-  // const handleCheckout = async () => {
-  //   try {
-
-  //     // http://localhost:3001/api
-  //       const response = await fetch(`${config.backendUrl}/student/payment`, {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({
-  //           amount: 5000, // Amount in cents (5000 = $50.00)
-  //         }),
-  //       });
-  
-  //       const data = await response.json();
-  
-  //       if (response.ok) {
-          
-  //         // window.location.href = data.url; // Redirect to the Checkout page
-
-  //         console.log("data in payment success", data);
-  //         console.log("url in payment success", data.url);
-          
-  //       } else {
-  //         console.error('Error creating checkout session:', data.error);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error during checkout process:', error);
-  //     }
-  //   };
-
-
-  //   const handleCheckout = async () => { 
-  //     try {
-
-
-  //       // Prepare data to send
-  //         const dataToSend = {
-  //           sessionId: sessionId, // You already have sessionId from useParams
-  //           selectedDate: date, // Selected date from the URL query parameters
-  //           selectedTimeSlot: time, // Selected time from the URL query parameters
-  //           concerns: concerns, // User's concerns input
-  //           amount: session?.fee || 0, // Assuming fee is in session data
-  //         };
-
-  //         const response = await axiosInstance.post('/student/payment', dataToSend);
-
-  
-  //         // Access the response data
-  //         const data = response.data;
-  
-  //         if (response.status === 200) {
-  //             // Handle success (you can use window.location.href for redirect if needed)
-  //             console.log("data in payment success", data);
-  //             console.log("url in payment success", data.url);
-  
-  //             // Example: Redirect to the Checkout page
-  //             window.location.href = data.url; // Uncomment if you want to redirect
-  
-  //         } else {
-  //             console.error('Error creating checkout session:', data.error);
-  //         }
-  //     } catch (error) {
-  //         // Handle errors
-  //         console.error('Error during checkout process:', error);
-  //     }
-  // };
-  
-
   const handleCheckout = async () => {
     try {
-      // Prepare payment data
       const paymentData = {
         sessionId: sessionId,
         selectedDate: date,
@@ -217,36 +147,21 @@ const handleConcernsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         concerns: concerns,
         amount: session?.fee || 0,
       };
+      
       localStorage.setItem('paymentData', JSON.stringify(paymentData));
   
-      // Step 1: Initiate Payment
-      const paymentResponse = await axiosInstance.post('/student/payment', paymentData);
+      // Step 1: Initiate Payment 
+      const paymentResponse = await axiosInstance.post('/student/book-and-pay', paymentData);
   
       if (paymentResponse.status === 200) {
         const { url, paymentId } = paymentResponse.data; // Assume paymentId is returned
-  
+
+
+        console.log("payment url",url);
         // Step 2: Redirect for payment
         window.location.href = url;
-  
-        // Step 3: On Payment Success, Create Booking
-        // Assume the payment success redirect lands on this page with query params
-        const bookingData = {
-          sessionId: sessionId,
-          date: date,
-          timeSlot: time,
-          concerns: concerns,
-          paymentId: paymentId, // Reference to the payment transaction
-        };
-  
-        const bookingResponse = await axiosInstance.post('/student/create-booking', bookingData);
-  
-        if (bookingResponse.status === 200) {
-          console.log('Booking created successfully:', bookingResponse.data);
-          // Navigate to a success page or show a success message
-          // navigate('/booking-success');
-        } else {
-          console.error('Error creating booking:', bookingResponse.data.error);
-        }
+
+
       } else {
         console.error('Error creating payment session:', paymentResponse.data.error);
       }

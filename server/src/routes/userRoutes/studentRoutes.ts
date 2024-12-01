@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { updateProfile, sessions, session, getProfile, createBooking, createBookingAndPayment, switchUserRole, bookedSessions, cancelBooking } from '../../controllers/studentController';
+import { updateProfile, sessions, session, getProfile, createBooking, createBookingAndPayment, switchUserRole, bookedSessions, cancelBooking, searchSessions } from '../../controllers/studentController';
 import { verifyToken } from '../../middleware/verifyUserToken';
 import { checkUserRole } from '../../middleware/checkUserRole';
 import multer from 'multer';
@@ -36,6 +36,9 @@ router.post('/switch-role', verifyToken, checkUserRole('student'), asyncHandler(
 router.get('/booked-sessions', verifyToken, checkUserRole('student'), asyncHandler(bookedSessions)); 
 
 router.put('/cancel-booking', verifyToken, checkUserRole('student'), asyncHandler(cancelBooking));  
+
+router.get('/sessions/search', verifyToken, checkUserRole('student'), asyncHandler(searchSessions));  
+
 
 
 

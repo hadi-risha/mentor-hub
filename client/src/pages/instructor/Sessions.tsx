@@ -267,18 +267,17 @@ const handleDelete = async (id: string) => {
                             {/* <p className='text-lg mb-5'>Mentor: {session.instructorId.firstName} {session.instructorId.lastName}</p> */}
                             <p className='text-lg mb-5'>Fees: ₹{session.fee}</p>
                             
-                            <div className='ml-14 space-x-5'>
+                            <div className='ml-28 space-x-5'>
                                 <button 
                                     onClick={() => handleUpdate(session._id)} 
                                     className='mt-2 mb-7 py-1 px-4 bg-[#f4c857] border-2 border-white text-black rounded-full hover:border-[#2cc58a]  transition duration-300 transform hover:scale-105 active:scale-95'>
                                     Update
                                 </button>
-                                <button 
-                                    // onClick={() => handleDelete(session._id)}
+                                {/* <button 
                                     onClick={() => handleDeleteClick(session._id)}
                                     className='mt-2 mb-7 py-1 px-4 bg-red-500 border-2 border-white text-black rounded-full hover:border-[#2cc58a]  transition duration-300 transform hover:scale-105 active:scale-95'>
                                     Delete
-                                </button>
+                                </button> */}
                             </div>
 
                         </div>

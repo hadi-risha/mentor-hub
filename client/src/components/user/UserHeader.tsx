@@ -8,6 +8,11 @@ import { IconParkSolidDownOne, LetsIconsCloseRound, RiLogoutCircleRLine }  from 
 import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/users/axiosInstance';
 
+interface ISearchSession {
+  _id: string;
+  title: string;
+  description: string;
+}
 
 
 const Header = () => {
@@ -18,6 +23,11 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRoleSwitchModalOpen, setIsRoleSwitchModalOpen] = useState(false); // state for role switch modal
+
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<ISearchSession[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [profileData, setProfileData] = useState({
     email: '',
@@ -86,6 +96,32 @@ const Header = () => {
   console.log("userRole in header", userRole);
 
 
+  const handleSearchInput = (e:  React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchSubmit = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const response = await axiosInstance.get(`student/sessions/search`, {
+        params: { query: searchQuery },
+      });
+      setSearchResults(response.data.data);
+
+      console.log(" serach-----------------response.data.data", response.data.data);
+      console.log(" serach-----------------response", response);
+
+      
+    } catch (error) {
+      console.error("Error searching sessions:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+
 
   const handleRoleSwitch = async () => {
     try {
@@ -123,12 +159,24 @@ const Header = () => {
         <div className="px-6 py-2 w-94 h-9 flex items-center bg-white rounded-full gap-x-5">
           <input
             type="text"
-            className=" flex-grow bg-white text-black focus:outline-none placeholder-gray-400 placeholder:text-xs"
+            value={searchQuery}
+            onChange={handleSearchInput}
+            className="search-input flex-grow bg-white text-black focus:outline-none placeholder-gray-400 placeholder:text-xs"
             placeholder="Search Instructor, session, Groups, etc"
           />
-          <button type="submit" className="px-3 py-1 rounded-full text-black hover:bg-gray-200">
+          <button onClick={handleSearchSubmit} type="submit" className="search-button px-3 py-1 rounded-full text-black hover:bg-gray-200">
             <FaSearch className=" ml-0 mt-1 size-4 text-gray-400" />
           </button>
+        </div>
+
+        {isSearching && <p>Loading...</p>}
+        <div className="search-results">
+          {searchResults.map((session) => (
+            <div key={session?._id} className="search-result-item">
+              <h3>{session.title}</h3>
+              <p>{session.description}</p>
+            </div>
+          ))}
         </div>
 
         <div className="flex space-x-3">

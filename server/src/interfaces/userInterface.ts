@@ -64,6 +64,9 @@ export interface IUserRepository {
 
   findBookingById(id: string): Promise<IBooking | null>;
 
+  searchSessions( query: string ): Promise<ISession[] | null>;
+
+
 
 
 }

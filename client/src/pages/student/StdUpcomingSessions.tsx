@@ -239,11 +239,28 @@ const UpcomingSessions = () => {
                             <p className='text-lg mb-5'>Time: {session.timeSlot}</p>
                             
                             {/* View Details Button */}
-                            <button 
+                            {/* <button 
                                 onClick={() => handleViewDetails(session._id, session.sessionId._id, session.date, session.timeSlot)}
                                 className='mt-2 mb-7 py-1 px-4 bg-[#f4c857] text-black rounded-full hover:bg-[#2cc58a] transition duration-300 transform hover:scale-105 active:scale-95'>
                                 View Details
-                            </button>
+                            </button> */}
+                            { session.status === 'cancelled' ? (
+                                <div 
+                                    className='mt-2 mb-7 w-7/12 py-1 px-5 bg-red-500 text-black rounded-full'>
+                                    Session Cancelled
+                                </div>
+
+                            ) : (
+                                <button 
+                                    onClick={() => handleViewDetails(session._id, session.sessionId._id, session.date, session.timeSlot)}
+                                    className='mt-2 mb-7 py-1 px-4 bg-[#f4c857] text-black rounded-full hover:bg-[#2cc58a] transition duration-300 transform hover:scale-105 active:scale-95'>
+                                    View Details
+                                </button> 
+                            )}
+
+
+
+                            {/* <p className='bg-red-500'>{session.status}</p> */}
                         </div>
                     </div>
                 ))

@@ -347,3 +347,22 @@ export const cancelBooking = async (req: Request, res: Response): Promise<Respon
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error canceling booking" });
   }
 }
+
+
+export const searchSessions = async (req: Request, res: Response): Promise<Response> => {
+  const { query } = req.query as { query?: string }; // Accept `query` from request
+  const { id } = req.userData as IUserData;
+
+  if (!query) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "Query parameter is required" });
+  }
+
+  try {
+    const searchResults = await userService.searchSessions(query);
+    return res.status(HttpStatus.OK).json({ message: "Search results fetched successfully", data: searchResults });
+
+  } catch (error) {
+    console.error("Error performing search:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error performing search" });
+  }
+}

@@ -95,4 +95,8 @@ export class UserService {
     async findBookingById(id: string): Promise<IBooking | null> {
         return this.userRepository.findBookingById(id);
     }
+
+    async searchSessions(query: string): Promise<ISession[] | null> {
+        return this.userRepository.searchSessions(query);
+    }
 }

@@ -27,6 +27,8 @@ import SingleSessionInfo from "../pages/student/StdSingleSessionInfo";
 import PaymentSuccess from "../pages/student/StdPaymentSuccess";
 import StudentBookSession from "../pages/student/StdBookSession";
 import AllSessions from "../pages/instructor/AllSessions";
+import StudentAllSessions from "../pages/student/AllSessions";
+
 import ReservedSessionInfo from "../pages/student/ReservedSessionInfo";
 import NewProfile from "../pages/instructor/NewProfile";
 import NewCreateSession from "../pages/instructor/NewCreateSession";
@@ -62,7 +64,7 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
               <>
                 {/* <Route path="/student/modal" element={<ProtectedRoute><UserModal /></ProtectedRoute>} />  */}
                 <Route path="/student/home" element={<ProtectedRoute><StudentHome /></ProtectedRoute>} /> 
-                <Route path="/student/sessions" element={<ProtectedRoute><AllSessions /></ProtectedRoute>} /> 
+                <Route path="/student/sessions" element={<ProtectedRoute><StudentAllSessions /></ProtectedRoute>} /> 
 
                 
                 <Route path="/student/instructors" element={<ProtectedRoute><ViewInstructors /></ProtectedRoute>} /> 
@@ -74,7 +76,7 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 <Route path="/student/book-session/:sessionId" element={<ProtectedRoute><StudentBookSession /></ProtectedRoute>} />  
                 <Route path="/student/session-payment/:sessionId" element={<ProtectedRoute><SessionPayment /></ProtectedRoute>} />    
 
-                <Route path="/student/payment-succes" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />  
+                <Route path="/student/payment-success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />  
                 <Route path="/student/payment-cancel" element={<ProtectedRoute><PaymentCancel /></ProtectedRoute>} />   
 
                 <Route path="/student/upcoming-sessions" element={<ProtectedRoute><UpcomingSessions /></ProtectedRoute>} />   

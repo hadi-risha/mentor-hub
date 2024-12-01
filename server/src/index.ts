@@ -81,6 +81,9 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 
-// npx tsc , nodemon dist/index.js
-// npm run lint
 
+
+
+
+// npm start  (development)
+// npm run lint
