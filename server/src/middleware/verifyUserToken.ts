@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { HttpStatus } from '../utils/httpStatusCodes';
 import config from '../config/config';
+import { UserService } from '../services/userService';
+import { log } from 'winston';
 
+
+const userService = new UserService();
 
 /* COMMON AUTH MIDDLEWARE */
 declare module 'express-serve-static-core' {
@@ -11,9 +15,15 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export const verifyToken = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 
-    // console.log("req obj in verifytoken",req);
+
+interface IUserData {
+    id: string;
+    isBlocked: boolean;
+    isRoleChanged: boolean;
+}
+
+export const verifyToken = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     console.log("user details in verify token", req.userData);
     try {
         console.log("in verify token part");
@@ -24,6 +34,14 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
         if (!token) {
             return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'access denied, no token provided' });
         }
+
+        // const { id } = req.userData as IUserData;
+
+        // console.log("id from verify user tokennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn", id);
+        
+
+        
+
 
         if (token.startsWith("Bearer ")) {  
             token = token.slice(7, token.length).trimLeft();

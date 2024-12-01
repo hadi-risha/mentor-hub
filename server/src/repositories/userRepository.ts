@@ -254,5 +254,18 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+
+    async updateIsRoleChanged(id: string): Promise<IUser | null> {
+        try {
+            return await UserModel.findOneAndUpdate(
+                { _id: id },
+                { isRoleChanged: false },
+                { new: true }
+            );
+        } catch (error) {
+            throw new Error(`Error updating user verification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
     
 }

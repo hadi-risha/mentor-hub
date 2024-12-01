@@ -1,28 +1,8 @@
-import { IcSharpPersonAdd, PrimeStarFill, AntDesignMessageFilled, FluentNotepadEdit16Filled, TeenyiconsUpSolid, SolarMenuDotsBold, IonPerson, LineiconsWorld, PhBagFill, IcRoundEmail, MdiEducationOutline, TypcnUserAdd } from '../../assets/usersIcons/ProfileIcons'
-import instructor from '../../assets/instructor.png'
-import bg1 from '../../assets/bg-1.jpeg'
-import bg2 from '../../assets/userImgs/bg-2.jpeg'
-import bg3 from '../../assets/bg-3.jpeg'
-import bg4 from '../../assets/bg-4.jpeg'
-import bg5 from '../../assets/bg-5.jpeg'
-import bg6 from '../../assets/bg-6.jpeg'
-import bg7 from '../../assets/bg-7.jpeg'
-import bg8 from '../../assets/bg-8.jpeg'
-import bg9 from '../../assets/bg-9.jpeg'
-import bg10 from '../../assets/bg-10.jpeg'
-import bg11 from '../../assets/bg-11.jpeg'
-import studentImg from '../../assets/userImgs/student.png'
-import { IconParkSolidDownOne, CharmMenuKebab, EmojioneStar, EmojioneMonotoneStar } from '../../assets/usersIcons/HomeIcons';
-import { BxCalendar, FluentPeopleTeam48Regular, IcOutlineAccessTime, PhChalkboardTeacher } from '../../assets/usersIcons/SessionIcons'
-import { useEffect, useState } from 'react'
-import axiosInstance from '../../utils/users/axiosInstance'
+import { PrimeStarFill, AntDesignMessageFilled, FluentNotepadEdit16Filled, TeenyiconsUpSolid, SolarMenuDotsBold, TypcnUserAdd } from '../../assets/usersIcons/ProfileIcons'
+import { useEffect, useState } from 'react';
+import axiosInstance from '../../utils/users/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
-
-import biology from "../../assets/userImgs/biology.png";
-import statistics from "../../assets/userImgs/statistics.png";
-import publicSpeaking from "../../assets/userImgs/publicSpeaking.png";
-
 
 
 
@@ -161,9 +141,10 @@ const UpcomingSessions = () => {
 
 
     // Handle click event to navigate to session details page
-    const handleViewDetails = (sessionId: string, date: string, time: string) => {
+    const handleViewDetails = (bookingId: string, sessionId: string, date: string, time: string) => {
         navigate(`/student/reserved-session/${sessionId}`, {
             state: {
+                bookingId,
                 date,
                 time,
             },
@@ -259,7 +240,7 @@ const UpcomingSessions = () => {
                             
                             {/* View Details Button */}
                             <button 
-                                onClick={() => handleViewDetails(session.sessionId._id, session.date, session.timeSlot)}
+                                onClick={() => handleViewDetails(session._id, session.sessionId._id, session.date, session.timeSlot)}
                                 className='mt-2 mb-7 py-1 px-4 bg-[#f4c857] text-black rounded-full hover:bg-[#2cc58a] transition duration-300 transform hover:scale-105 active:scale-95'>
                                 View Details
                             </button>

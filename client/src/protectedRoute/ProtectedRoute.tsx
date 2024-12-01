@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAppSelector } from "../redux/store"; // Assuming you are using typed selectors from Redux
+import { useAppSelector } from "../redux/store"; 
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -7,6 +7,16 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const userToken = useAppSelector(
     (state) => state.login?.token || state.otp.token  || localStorage.getItem('token')  // Get token from Redux
   );
+
+  const isBlocked = useAppSelector(
+    (state) => localStorage.getItem('isBlocked') === "true" || state.login?.isBlocked // Get isBlocked from Redux
+  ); 
+
+
+  console.log("is user blocked, from protected routes  ", isBlocked);
+  
+
+
   
   const adminToken = localStorage.getItem('adminToken'); // Check for admin token from localStorage
   const location = useLocation();
@@ -19,7 +29,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   if (isAdminRoute) {
     return adminToken ? children : <Navigate to="/admin/login" replace />;
   } else {
-    return userToken ? children : <Navigate to="/login" replace />;
+    return userToken && (!isBlocked) ?  children : <Navigate to="/login" replace />;
   }
 };
 

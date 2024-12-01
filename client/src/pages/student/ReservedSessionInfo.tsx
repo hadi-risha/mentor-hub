@@ -2,7 +2,7 @@ import instructor from '../../assets/userImgs/instructor.png';
 import { EmojioneStar, EmojioneMonotoneStar } from '../../assets/usersIcons/HomeIcons';
 import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/users/axiosInstance';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 interface ISession {
     _id: string;
@@ -31,7 +31,11 @@ const ReservedSessionInfo = () => {
     const { id } = useParams();
 
     const { state } = useLocation(); // access state from navigation
-    const { date, time } = state || {}; 
+    const { bookingId, date, time } = state || {}; 
+
+
+    console.log("bookingId.....", bookingId);
+    
 
     const [session, setSession] = useState<ISession>();
     const [loading, setLoading] = useState(true);
@@ -76,8 +80,8 @@ const ReservedSessionInfo = () => {
         return `${convertedHours}:${minutes.toString().padStart(2, '0')} ${period}`; // format with leading zero if needed
     };
 
-    const handleButtonClick = () => {
-        navigate('/student/upcoming-sessions');
+    const handleCancelSession = () => {
+        // const response = await axiosInstance.put('/student/update-profile', formData, {
         
     };
   
@@ -87,6 +91,13 @@ const ReservedSessionInfo = () => {
             <div className='mx-32 py-14 w-screen h-screen bg-[white]'>
                 <div className='h-auto pb-32 bg-[#f6f6f6] rounded-2xl'>
                     <div className='bg-[#40ab84] rounded-t-2xl w-full h-48 pt-6 flex pl-28 shadow'>
+
+                    {/* <Link to={`/student/book-session/${session?._id}`}> */}
+                    <Link to={"/student/upcoming-sessions"}>
+                        <div className='border border-white w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                            <span className="text-white text-xl">←</span>
+                        </div>
+                    </Link>
 
                         <div className='ml-14 w-5/12'>
                             <h1 className='text-xl text-white font-bold font-serif'>{session?.title}</h1>
@@ -146,10 +157,10 @@ const ReservedSessionInfo = () => {
                                 <div className='flex justify-center mt-7'>
                                     <button 
                                         onClick={() => {
-                                                handleButtonClick(); 
+                                            handleCancelSession(); 
                                         }}
                                         className="w-40 h-9 bg-[#3ee1a6] text-white font-semibold flex items-center justify-center rounded-full shadow-md border border-black relative overflow-hidden group transition duration-700">
-                                        <span className="text-black relative z-10 text-xs">Return to Previous Page</span>
+                                        <span className="text-black relative z-10 text-xs">Cancel Session</span>
                                         <span className="absolute inset-0 bg-[#ff5c4c] transition-all duration-600 group-hover:w-full group-hover:left-0 w-0 left-[-100%] h-full"></span>
                                     </button>
                                 </div>

@@ -1,13 +1,12 @@
-// forgotPasswordSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import config from '../config';
 
 export const resetUserPassword = createAsyncThunk(
   'forgotPassword/resetUserPassword',
   async ({ token, password,confirmPassword }: { token: string; password: string; confirmPassword: string }) => {
-    const response = await axios.post(`http://localhost:3001/api/auth/reset-password/${token}`, { password, confirmPassword })
-    
-    return response.data; // Ensure this contains a 'message'
+    const response = await axios.post(`${config.backendUrl}/auth/reset-password/${token}`, { password, confirmPassword })
+    return response.data; 
   }
 );   
 
@@ -31,15 +30,14 @@ const resetPasswordSlice = createSlice({
       })
       .addCase(resetUserPassword.fulfilled, (state, action) => {
         state.loading = false;
-        state.successMessage = action.payload.message; // Make sure message exists
+        state.successMessage = action.payload.message; 
       })
       .addCase(resetUserPassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'An unknown error occurred'; // Check action.error structure
+        state.error = action.error.message || 'An unknown error occurred'; 
       });
   },
 });
 
 export const { resetState } = resetPasswordSlice.actions;
-
 export default resetPasswordSlice.reducer;

@@ -22,3 +22,7 @@ export interface IUser {
     role: string;
     isVerified: boolean;
 }
+
+export interface IUserRole {
+    role: string | null; 
+}

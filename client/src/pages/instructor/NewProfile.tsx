@@ -150,8 +150,8 @@ const NewProfile = () => {
                             <TeenyiconsUpSolid className='mt-2 ml-3' />
                         </div>
 
-                        <a href={"/instructor/sessions"}>
-                            <p className='text-black font-serif text-lg'>Sessions</p>
+                        <a href={"/instructor/session-actions"}>
+                            <p className='text-black font-serif text-lg'>Session Actions</p>
                         </a>
 
                         <a href={"/instructor/booked-sessions"}>

@@ -1,12 +1,12 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from "jsonwebtoken";
-import { UserService } from '../services/userService';
-import { HttpStatus } from '../utils/httpStatusCodes';
-import { generateOtp, verifyOtp } from '../utils/otpService';
-import { sendOtpEmail } from '../utils/otpEmailService';
-import { generateResetPasswordToken,sendForgotPasswordEmail  } from '../utils/forgotPswService';
-import config from '../config/config';
+import { Request, Response } from 'express'; //*
+import bcrypt from 'bcryptjs'; //*
+import jwt from "jsonwebtoken"; //*
+import { UserService } from '../services/userService'; //*
+import { HttpStatus } from '../utils/httpStatusCodes';  //*
+import { generateOtp, verifyOtp } from '../utils/otpService'; //*
+import { sendOtpEmail } from '../utils/otpEmailService'; //*
+import { generateResetPasswordToken,sendForgotPasswordEmail  } from '../utils/forgotPswService'; //*
+import config from '../config/config'; //*
 
 
 
@@ -50,6 +50,8 @@ export class AuthController {
                 password: hashedPassword,
                 role: 'student',
                 isVerified: false,
+                isBlocked: false,
+                isRoleChanged: false,
             });
 
             const otp = generateOtp(email);
@@ -88,10 +90,9 @@ export class AuthController {
                 console.log("existingUser in verify user", existingUser);
                 
                 if (!existingUser) {
-                    
                     return res.status(HttpStatus.BAD_REQUEST).json({ message: 'user doesnt exists' });
                 }
-                const token = jwt.sign({ id: existingUser._id, role: existingUser.role, userDetails: req.userData }, config.jwtSecret as string);
+                const token = jwt.sign({ id: existingUser._id, role: existingUser.role, isBlocked: existingUser.isBlocked, isRoleChanged: existingUser.isRoleChanged, userDetails: req.userData }, config.jwtSecret as string);
                 const userWithoutPassword = existingUser.toObject();  
                 delete userWithoutPassword.password; 
     
@@ -182,7 +183,6 @@ export class AuthController {
             const existingUser = await this.userService.findUserByEmail(email);
             if (!existingUser) {
                 console.log("User doesn't exist. Please recheck your email.");
-                
                 return res.status(HttpStatus.BAD_REQUEST).json({ message: "User doesn't exist. Please recheck your email." });
             }
 
@@ -195,7 +195,6 @@ export class AuthController {
             console.log("password match:", isMatch);
             if (!isMatch) {
                 console.log("invalid credentials/ psw");
-                
                 return res.status(HttpStatus.BAD_REQUEST).json({ message: "invalid credentials." });
             }
 
@@ -207,7 +206,9 @@ export class AuthController {
             console.log("user details in login", req.userData);
             
 
-            const token = jwt.sign({ id: existingUser._id, role: existingUser.role, userDetails: req.userData }, config.jwtSecret as string);
+            // const token = jwt.sign({ id: existingUser._id, role: existingUser.role, userDetails: req.userData }, config.jwtSecret as string);
+            const token = jwt.sign({ id: existingUser._id, role: existingUser.role, isBlocked: existingUser.isBlocked, isRoleChanged: existingUser.isRoleChanged, userDetails: req.userData }, config.jwtSecret as string);
+
             const userWithoutPassword = existingUser.toObject();  
             delete userWithoutPassword.password; 
 

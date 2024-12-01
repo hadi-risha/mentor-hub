@@ -101,10 +101,6 @@ export class AdminController {
 
   public async switchUserRole(req: Request, res: Response): Promise<Response> {
     const { id, newRole } = req.body;
-
-    
-
-
     try {
       const updatedUser = this.adminService.switchUserRole(id, newRole)
       console.log("updatedUser-----------", updatedUser);

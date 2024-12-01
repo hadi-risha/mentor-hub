@@ -1,9 +1,8 @@
 
-import {FlatColorIconsGoogle}  from "../../assets/usersIcons/LoginIcons";
+import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { registerUser } from '../../slices/userSlice';
-import { useState } from "react";
 import ErrorModal from "../../utils/users/ErrorModal";
 import { useNavigate } from 'react-router-dom';
 
@@ -47,7 +46,6 @@ const Register = () => {
     });
   };
 
-
   // Function to validate names (only alphabetic characters)
   const isValidName = (name: string) => /^[A-Za-z]+$/.test(name);
 
@@ -56,7 +54,6 @@ const Register = () => {
     return password.length >= 8;
   };
   
-
   // Handle form submission
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +68,7 @@ const Register = () => {
       confirmPassword: '',
     });
 
-  // Check if any field is just spaces
+    // Check if any field is just spaces
     for (const [key, value] of Object.entries(formData)) {
       if (!value.trim()) {
         setErrors((prev) => ({
@@ -99,7 +96,7 @@ const Register = () => {
       hasError = true;
     }
 
-     // Password and Confirm Password Validation
+    // Password and Confirm Password Validation
     if (!isValidPassword(formData.password)) {
       setErrors((prev) => ({
         ...prev,
@@ -126,12 +123,9 @@ const Register = () => {
 
     // Dispatch the registration action
     const { firstName, lastName, email, password, confirmPassword } = formData;
-    // dispatch(registerUser({ firstName, lastName, email, password, confirmPassword }));
-
 
     try {
       await dispatch(registerUser({ firstName, lastName, email, password, confirmPassword })).unwrap();
-      // navigate(`/otp-verification/${encodeURIComponent(email)}`);
       navigate(`/otp-verification/${encodeURIComponent(email)}?timeractive=true`);
     } catch (err: any) {
       if (err.message && err.message.includes('already exists')) {
@@ -141,18 +135,14 @@ const Register = () => {
         setServerError("An unknown error occurred.");
         setModalOpen(true);
       }
-      console.error('Error occurred:', err); // Log error for debugging
+      console.error('Error occurred:', err); 
     }
   };
 
   const closeModal = () => {
     setModalOpen(false); // Function to close the modal
-    setServerError(''); // Clear the error message
+    setServerError(''); 
   };
-
-  // const loginwithgoogle = ()=>{
-  //   window.open("http://localhost:3001/api/auth/google/callback","_self")
-  // }
 
   return (
     <div className="h-screen bg-gray-100">
@@ -180,10 +170,9 @@ const Register = () => {
                   name="firstName"
                   value={formData.firstName} 
                   onChange={handleChange} 
-                  
                   placeholder="First Name"
                   className=" ml-9 mt-11 w-72 p-2 text-sm flex-grow bg-gray-100 text-black focus:outline-none placeholder-gray-500 placeholder:text-xs"
-                />
+              />
                 {errors.firstName && <p className="text-red-500 text-xs ml-11">{errors.firstName}</p>}
 
               <input
@@ -191,19 +180,16 @@ const Register = () => {
                 name="lastName"
                 value={formData.lastName} 
                 onChange={handleChange} 
-                
                 placeholder="Last Name"
                 className="ml-9 mt-2 w-72 p-2 text-sm flex-grow bg-gray-100 text-black focus:outline-none placeholder-gray-500 placeholder:text-xs"
               />
               {errors.lastName && <p className="text-red-500 text-xs ml-11">{errors.lastName}</p>}
-
 
               <input
                 type="email" 
                 name="email"
                 value={formData.email} 
                 onChange={handleChange} 
-                
                 placeholder="Email"
                 className="ml-9 mt-2 w-72 p-2 text-sm flex-grow bg-gray-100 text-black focus:outline-none placeholder-gray-500 placeholder:text-xs"
               />
@@ -214,25 +200,21 @@ const Register = () => {
                 name="password"
                 value={formData.password} 
                 onChange={handleChange} 
-                
                 placeholder="Password"
                 className="ml-9 mt-2 w-72 p-2 text-sm flex-grow bg-gray-100 text-black focus:outline-none placeholder-gray-500 placeholder:text-xs"
               />
               {errors.password && <p className="text-red-500 text-xs ml-11">{errors.password}</p>}
-
 
               <input
                 type="Password" 
                 name="confirmPassword"
                 value={formData.confirmPassword} 
                 onChange={handleChange} 
-                
                 placeholder="Confirm password"
                 className="ml-9 mt-2 w-72 p-2 text-sm flex-grow bg-gray-100 text-black focus:outline-none placeholder-gray-500 placeholder:text-xs"
               />
               {errors.confirmPassword && <p className="text-red-500 text-xs ml-11">{errors.confirmPassword}</p>}
 
-              
               <button 
                 type="submit" 
                 disabled={loading} 
@@ -246,34 +228,13 @@ const Register = () => {
                 onClose={closeModal}
               />
             </form>
-
-            {/* <div className="mt-4 flex items-center justify-center space-x-4">
-              <hr className="w-32 border-gray-300" />
-              <span className="text-black text-sm">or</span>
-              <hr className="w-28 border-gray-300" />
-            </div> */}
-{/* 
-            <div className="mt-4 ml-9 w-72 flex items-center rounded-full border-2 border-gray-300 px-3 py-2 w-94 h-7 ">
-              <FlatColorIconsGoogle className="ml-16" /> */}
-              {/* <a href="/google-auth">
-                <button className="-ml-9  text-black px-11 py-2 text-xs ">Sign up with Google</button>
-              </a> */}
-
-              {/* <button className="-ml-9  text-black px-11 py-2 text-xs" onClick={loginwithgoogle}>
-                  Sign up with Google
-                </button> */}
-            {/* </div> */}
-          
           </div>
           
-          
         </div>
-      
     </div>
-    
   );
 };
   
-  export default Register;
+export default Register;
 
   

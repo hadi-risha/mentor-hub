@@ -38,6 +38,9 @@ interface CustomUser {
     email: string;
     role: string;
     isVerified: boolean;
+
+    isBlocked: boolean;
+    isRoleChanged: boolean;
 }
 router.get(
     '/google/callback',
@@ -47,14 +50,16 @@ router.get(
     }),
     (req: Request, res: Response) => {
         const user = req.user as CustomUser;
-        const { role } = user;
+        const { role, isBlocked, isRoleChanged } = user;
         console.log("role", role);
 
-        const token = jwt.sign({ id: user._id, role: user.role, userDetails: user }, config.jwtSecret );
+        const token = jwt.sign({ id: user._id, role: user.role, isBlocked: user.isBlocked, isRoleChanged: user.isRoleChanged, userDetails: user }, config.jwtSecret );
 
         console.log("redirect to ->", `${config.frontendUrl}/${role}/home`);
         const homePageUrl = `/${user.role}/home`;
-        res.redirect(`${config.frontendUrl}/login?token=${token}&role=${role}&userData=${user}`);
+
+        
+        res.redirect(`${config.frontendUrl}/login?token=${token}&role=${role}&isBlocked=${isBlocked}&isRoleChanged=${isRoleChanged}&userData=${user}`);
     }
 );  
 

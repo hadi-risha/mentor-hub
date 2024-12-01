@@ -1,6 +1,6 @@
-// features/forgotPasswordSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import config from '../config';
 
 interface ForgotPasswordState {
   loading: boolean;
@@ -18,8 +18,8 @@ export const requestPasswordReset = createAsyncThunk(
   'forgotPassword/requestPasswordReset',
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/forgot-password', { email });
-      return response.data; // Expecting { message: string }
+      const response = await axios.post(`${config.backendUrl}/auth/forgot-password`, { email });
+      return response.data; 
     } catch (error: any) {
       return rejectWithValue(error.response.data.message);
     }
@@ -44,7 +44,7 @@ const forgotPasswordSlice = createSlice({
       })
       .addCase(requestPasswordReset.fulfilled, (state, action) => {
         state.loading = false;
-        state.successMessage = action.payload.message; // Assuming your backend sends a message
+        state.successMessage = action.payload.message; 
       })
       .addCase(requestPasswordReset.rejected, (state, action) => {
         state.loading = false;
@@ -54,5 +54,4 @@ const forgotPasswordSlice = createSlice({
 });
 
 export const { resetState } = forgotPasswordSlice.actions;
-
 export default forgotPasswordSlice.reducer;

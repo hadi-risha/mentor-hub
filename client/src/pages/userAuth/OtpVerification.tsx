@@ -5,10 +5,11 @@ import axios from 'axios';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { verifyOtp } from '../../slices/otpSlice';
 
-import { useAppDispatch } from '../../hooks/hooks'; 
+// import { useAppDispatch } from '../../hooks/hooks'; 
 import SuccessModal from "../../utils/users/successModal";
 import config from '../../config'
 import { setUserRole } from '../../slices/userRoleSlice';
+import { useAppDispatch } from '../../redux/store';
 
 
 
@@ -142,6 +143,8 @@ const OtpVerification = () => {
             
             console.log('Navigating to /student/home');
             localStorage.setItem("userRole", "student");
+            localStorage.setItem('isBlocked', String(false));  
+            localStorage.setItem('isRoleChanged', String(false));
             navigate('/student/home');
         } catch (err: any) {
             console.error('Error occurred:', err);

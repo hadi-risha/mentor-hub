@@ -5,11 +5,7 @@ import {IcBaselineMenu, GravityUiPerson, FlowbiteMessagesOutline, HugeiconsNotif
 const SideNavBar = () => {
 
   const userRole = localStorage.getItem('userRole')
-  console.log("userRole in navbarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",userRole);
   
-
-
-
   return (
     <div>
         <div className='bg-white w-24 h-screen'>

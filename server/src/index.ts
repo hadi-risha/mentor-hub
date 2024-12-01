@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import bodyParser from "body-parser";
 import cors from 'cors';
 import helmet from "helmet";
@@ -17,10 +17,6 @@ import { HttpStatus } from './utils/httpStatusCodes';
 import errorHandler from './middleware/errorHandler';
 import './utils/logCleaner';
 import cookieParser from 'cookie-parser';
-
-import Stripe from 'stripe';
-const stripe = new Stripe(config.stripeSecretKey, {});
-
 
 const app: Express = express();
 
@@ -46,13 +42,12 @@ app.use(express.json());
 app.use(helmet());   //for req safety
 app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
 
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
 app.use(bodyParser.json({ limit: '30mb' }));
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
 
 app.use(cookieParser());
-
-app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
-
 
 
 /* ROUTES */
@@ -77,7 +72,6 @@ const connectDB = async () => {
     }
 };
 connectDB();
-
 
 
 app.get('/', (req, res) => {

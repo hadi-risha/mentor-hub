@@ -16,7 +16,7 @@ export async function uploadImageToS3(file: Express.Multer.File): Promise<{ url:
     const key = `profile-pics/${Date.now()}-${file.originalname}`;
     const params = {
       Bucket: config.awsBucketName!,
-      Key: key, 
+      Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
     };

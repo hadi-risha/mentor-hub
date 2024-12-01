@@ -235,6 +235,19 @@ const Header = () => {
           </a>
         </li>
 
+
+        {userRole === 'instructor'? (
+          <li className="flex items-center">
+            <a href='/instructor/all-sessions'>
+              <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
+                <p className='text-black font-serif'>Sessions</p>
+              </div>
+            </a>
+          </li>
+        ): null}
+
+
+
         {userRole === 'student'? (
           <li className="flex items-center">
             <a href='/student/sessions'>
@@ -242,7 +255,7 @@ const Header = () => {
                 <p className='text-black font-serif'>Sessions</p>
               </div>
             </a>
-        </li>
+          </li>
         ): null}
 
         <li className="flex items-center">

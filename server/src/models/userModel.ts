@@ -25,7 +25,8 @@ export interface IUser extends Document {
     url?: string | '';
   };
 
-  isBlocked?: boolean;
+  isBlocked: boolean;
+  isRoleChanged: boolean;
   
 
 }
@@ -120,6 +121,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     required: false, // make the entire img field optional
   },
   isBlocked: { 
+    type: Boolean, 
+    default: false 
+  },
+  isRoleChanged: { 
     type: Boolean, 
     default: false 
   },

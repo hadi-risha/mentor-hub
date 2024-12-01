@@ -12,9 +12,10 @@ export interface IUser extends Document {
   password?: string;
   role: string;
   isVerified: boolean;
+  isBlocked: boolean;
+  isRoleChanged: boolean;
   resetPasswordToken?: string | null;
   resetPasswordExpiry?: Date | null;
-
 
   about?: string;
   country?: string;
@@ -24,7 +25,6 @@ export interface IUser extends Document {
   achievements?: string;
   education?: string;
   experience?: string;
-  // profilePic?: string;
   image?: {
     key?: string;
     url?: string;
@@ -60,6 +60,7 @@ export interface IUserRepository {
 
 
   instructorAvailableSessions( id: string ): Promise<ISession[] | null>;
+  updateIsRoleChanged(id: string ): Promise<IUser | null>;
 
 
 }

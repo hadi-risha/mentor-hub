@@ -1,7 +1,6 @@
 
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axiosInstance from '../utils/users/axiosInstance'
-import axios from 'axios';
 
 interface OtpPayload {
   email: string;
@@ -16,26 +15,21 @@ interface OtpResponse {
 
 export const verifyOtp = createAsyncThunk<OtpResponse, OtpPayload>(
   'otp/verifyOtp',
-  
   async ({ email, otp }, thunkAPI) => {
     try {
-        console.log("in verifyOtp slice");
-      // const response = await axios.post('http://localhost:3001/api/auth/verify-otp', { email, otp });
+      console.log("in verifyOtp slice");
       const response = await axiosInstance.post('/auth/verify-otp', { email, otp });
-      console.log("response.data  in verifyOtp slice.....................................mm",response.data);
-      
+      console.log("response.data in verifyOtp slice : ",response.data);
       const { token } = response.data;
       localStorage.setItem('token', token);
-
       return response.data;
     } catch (error: any) {
-        console.log("in verifyOtp slice......error", error);
+      console.log("error in verifyOtp slice", error);
       return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
 
-// otpSlice
 const otpSlice = createSlice({
   name: 'otp',
   initialState: {
@@ -49,7 +43,7 @@ const otpSlice = createSlice({
     builder.addCase(verifyOtp.fulfilled, (state, action) => {
       state.isVerified = true;
       state.message = action.payload.message;
-      state.token = action.payload.token; // Store token in Redux state
+      state.token = action.payload.token; 
     });
     builder.addCase(verifyOtp.rejected, (state, action) => {
       state.error = action.payload as string;

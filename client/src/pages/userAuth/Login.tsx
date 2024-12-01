@@ -1,19 +1,15 @@
 
 import { useEffect, useState } from "react";
 import {FlatColorIconsGoogle, MdiEye, MdiEyeOff}  from "../../assets/usersIcons/LoginIcons";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState, useAppDispatch, useAppSelector } from '../../redux/store';
 import { loginUser } from '../../slices/loginSlice';  // Import the login action
 import { useNavigate } from "react-router-dom";
 import LoginErrorModal from '../../utils/users/LoginErrorModal';
 import VerifyEmailModal from '../../utils/users/VerifyEmailModal';
 import config from '../../config';
-import axios from "axios";
 import { setUserRole } from '../../slices/userRoleSlice';
-import UserRoutes from "../../routes/UserRoutes";
 
-
-//
 
 const Login = () => {
   const navigate = useNavigate();
@@ -24,7 +20,6 @@ const Login = () => {
   const dispatch = useAppDispatch();
   const loginState = useSelector((state: RootState) => state.login);  // Select login state
 
-  // const userRole = useSelector((state: RootState) => state.userRole);
   const userRole = useAppSelector((state) => state.userRole.role);
 
   const [emailError, setEmailError] = useState("");   // Field-specific error
@@ -34,98 +29,67 @@ const Login = () => {
   // const [verifyEmail, setVerifyEmail] = useState("");   // verify email error
 
   const [isModalOpen, setModalOpen] = useState(false);
-  // const [isVerifyModalOpen, setVerifyModalOpen] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
 
-
-  // const [authToken, setAuthToken] = useState('');
   const [authToken, setAuthToken] = useState(localStorage.getItem('token') || '');
   const [userData, setUserData] = useState('');
 
   useEffect(() => {
-    
-    
-    console.log("1");
-    console.log("userRole from store----------------------------1", userRole);
+    console.log("google auth section");
+    console.log("userRole from store", userRole);
     
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
     const role = urlParams.get("role");
+    const isBlocked = urlParams.get("isBlocked") === "true"; // Convert string to boolean
+    const isRoleChanged = urlParams.get("isRoleChanged") === "true"; // Convert string to boolean
     let data = urlParams.get("userData");
 
-
-    
-
-
-
+    console.log("these coming 5 lines are only from google auth so dont mind the state it can be wrong in other things case but work well in G auth");
     console.log("token--------------------", token );
     console.log("data--------------------", data );
     console.log("role--------------------", role );
+    console.log("isBlocked--------------------.....", isBlocked );
+    console.log("isRoleChanged--------------------", isRoleChanged );
 
-    console.log("2");
-        if (token && role) {
-          dispatch(setUserRole(role)); // Dispatch action to store the role in Redux
+    if (isBlocked) {
+      // Show an alert if the user is blocked
+      window.alert("Your account is blocked. Please contact support for assistance.");
+      return; // Exit the useEffect early if the user is blocked
+    }
 
-          localStorage.setItem("userRole", role);
-
-          console.log("userRole from store after seting store role value 2", userRole);
-        
-
-          setAuthToken(token);
-          localStorage.setItem("token", token); // Store token in localStorage for persistence
-          window.location.reload();
-
-        }
-    
-        
-
-        console.log("from login page , navigate to --> ", role ,"/home");
-        console.log("3");
-        
-        console.log("role url",`/${role}/home`);
-        
-        // navigate(`/${role}/home`);
-
-        
-
-
-        console.log("......");
-        console.log("......");
-    }, [dispatch]);
-
-
-  //   useEffect(() => {
-  //     // Access and log the user role after it has been set
-  //     console.log("userRole from store after setting role:::::::::::::::", userRole);
-  // }, [userRole]);
-
-
-
-    // useEffect(() => {
-    //   console.log("userRole from store after seting store role value,     2nd ueff", userRole);
-    //   console.log("comeees 2nd useeffect");
+    if (token && role && isBlocked === false) {
+      console.log("block data store localstorage from google auth !!!!!!!!!!!!!!!!!!!!!!");
       
-    //   const token = localStorage.getItem('token');
-    //   if (token) {
-    //     console.log("if case    7");
-        
-    //     // Redirect to home page or refresh
-    //     console.log("Token found, redirecting or refreshing...");
-    //     console.log("user role  00", userRole);
-        
-    //     // You can either redirect to home page or refresh
-    //     // navigate('/'); // Replace '/home' with your desired route
-    //     // window.location.reload();
-    //   }
-    // }, []);
+      dispatch(setUserRole(role)); // Dispatch action to store the role in Redux
+
+      localStorage.setItem("userRole", role);
+      localStorage.setItem('isBlocked', String(isBlocked));
+      localStorage.setItem('isRoleChanged', String(false));    
+
+      setAuthToken(token);
+      localStorage.setItem("token", token); // Store token in localStorage for persistence
+      window.location.reload();
+
+    }
+    console.log("role url",`/${role}/home`);
+    // navigate(`/${role}/home`);
+  }, [dispatch]);
+
 
   
-
-
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+
+
+
+
+
+
+
 
 
   const handleSubmit = async(e: React.FormEvent) => {
@@ -149,26 +113,41 @@ const Login = () => {
     try {
       const result = await dispatch(loginUser({ email, password })).unwrap();
       console.log("result in login pagee", result);
+
+      console.log("in success case of normal login isblocked", result.isBlocked);
+      console.log("result-------",result);
+      console.log("result-------",result.userData);
+      console.log("result-------",result.userData.isBlocked);
+
+      
+      // if (result.isBlocked){
+      //   alert("your accont has been blocked, restri from suus cse in normal logi")
+      //   return;
+      // }
+      
       
       if (result.role) {
-
         console.log("in result.role", result.role);
-        
+        console.log("store details to local storage");
         localStorage.setItem("userRole", result.role);
-
-
-        navigate(`/${result.role}/home`);
-        // navigate(result.homePageUrl);  // Redirect to the specified homepage URL
-      }               
+        // navigate(`/${result.role}/home`);
+      }             
+      
+      
 
       
     } catch (err: any) {
+      console.log("in err case of normal login isblocked");
 
       console.log("login page catch block222222222222222222");
+      console.log("err?.isBlocked", err?.isBlocked);
       
       console.log("show all errors",err);
       console.log("needsverification",err?.needsVerification);
       console.log("message",err.message);
+
+      
+      
 
       if (err?.needsVerification) {
         console.log("needsVerification 1, if block");

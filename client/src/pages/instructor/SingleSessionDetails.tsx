@@ -75,7 +75,7 @@ const ISingleSessionDetails = () => {
     };
 
     const handleButtonClick = (id: string) => {
-        navigate(`/instructor/sessions`);
+        navigate(`/instructor/session-actions`);
     };
   
     return (

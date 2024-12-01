@@ -1,7 +1,7 @@
-//first slice i created/ more likely for regiter/ so check only that things in this or any other persisting details store here
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { IUser,IRegisterData } from '../types/User';
+import config from '../config';
 
 interface UserState {
   user: IUser | null;
@@ -15,19 +15,24 @@ const initialState: UserState = {
   error: null,
 };
 
-export const registerUser = createAsyncThunk(
+// Async Thunk
+export const registerUser = createAsyncThunk(   
   'user/registerUser',
   async (userData: IRegisterData, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/signup', userData);  
+      const response = await axios.post(`${config.backendUrl}/auth/signup`, userData);
       return response.data;
     } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data);
+      }
       return rejectWithValue(error.response.data);
     }
   }
 );
 
-export const userSlice = createSlice({
+//Reducer
+export const userSlice = createSlice({ 
   name: 'user',
   initialState,
   reducers: {

@@ -86,4 +86,8 @@ export class UserService {
     async instructorAvailableSessions(istructorId: string): Promise<ISession[] | null> {
         return this.userRepository.instructorAvailableSessions(istructorId);
     }
+
+    async updateIsRoleChanged(id: string ): Promise<IUser | null> {
+        return this.userRepository.updateIsRoleChanged(id)
+    }
 }

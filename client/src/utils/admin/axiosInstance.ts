@@ -3,51 +3,46 @@ import axios from 'axios';
 import config from '../../config';
 
 const axiosInstance = axios.create({
-  baseURL: config.backendUrl, // Your API base URL
+  baseURL: config.backendUrl, 
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add a request interceptor to include the token in headers
+// Request Interceptor to include token
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Retrieve token from localStorage
     const isAdminPath = config.url?.startsWith('/admin');
     
     const token = isAdminPath
-    ? localStorage.getItem('adminToken') // Use adminToken for admin routes
+    ? localStorage.getItem('adminToken')
     : localStorage.getItem('userToken');
-    
-    // If the token exists, add it to the Authorization header
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers['Authorization'] = `Bearer ${token}`;    // Attach token to headers
     }
-
     return config;
   },
   (error) => {
-    // Handle request error
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor to handle errors globally
+// Response interceptor for error handling
 axiosInstance.interceptors.response.use(
   (response) => response,
+  
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expired or unauthorized access
       const isAdminPath = window.location.pathname.startsWith('/admin');
       if (isAdminPath) {
-        localStorage.removeItem('adminToken'); // Remove admin token
-        window.location.href = '/admin/login'; // Redirect to admin login
+        localStorage.removeItem('adminToken'); 
+        window.location.href = '/admin/login'; 
       } else {
-        localStorage.removeItem('userToken'); // Remove user token
-        window.location.href = '/login'; // Redirect to user login
+        localStorage.removeItem('userToken'); 
+        window.location.href = '/login'; 
       }
     }
-
     return Promise.reject(error);
   }
 );

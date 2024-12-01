@@ -41,7 +41,7 @@ export class AdminRepository implements IAdminRepository {
     async switchUserRole(id: string, newRole: string): Promise<IUser> {
         try {
             console.log("in admin update user role repository");
-            const updatedUser = await UserModel.findByIdAndUpdate(id, { role: newRole },{ new: true }).exec();
+            const updatedUser = await UserModel.findByIdAndUpdate(id, { role: newRole, isRoleChanged: true },{ new: true }).exec();
         
             if (!updatedUser) {
                 console.log("User not found");
@@ -52,8 +52,5 @@ export class AdminRepository implements IAdminRepository {
             throw new Error(`Error updating user role: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
-
-
-
     
 }

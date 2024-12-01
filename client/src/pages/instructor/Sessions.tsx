@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import axiosInstance from '../../utils/users/axiosInstance'
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
+import Modal from '../../utils/users/userLogout';
+
 
 
 
@@ -34,6 +36,9 @@ const Sessions = () => {
 
     const [sessions, setSessions] = useState<ISession[]>([]); // Typed state
     const [loading, setLoading] = useState(true);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
     const [profileData, setProfileData] = useState({
         role: '',
@@ -141,18 +146,18 @@ const Sessions = () => {
 const handleDelete = async (id: string) => {
     
     try {
-        // let response = await axiosInstance.post('/student/switch-role');
-        // const response = await axiosInstance.post('/instructor/delete-session');
         const response = await axiosInstance.delete(`/instructor/delete-session/${id}`);
-
-
         console.log("response",response);
-        
         
     } catch (error) {
         console.error('Error switching role:', error);
     }
+  };
 
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedSessionId(id); // Store the ID of the session to delete
+    setIsModalOpen(true); // Show the modal
   };
 
   
@@ -222,25 +227,13 @@ const handleDelete = async (id: string) => {
                             <p className='text-black font-serif text-lg'>About</p>
                         </a>
                         <div>
-                            <p className='text-primary-orange font-serif text-lg'>Sessions</p>
-                            <TeenyiconsUpSolid className='mt-2 ml-3' />
+                            <p className='text-primary-orange font-serif text-lg'>Session Actions</p>
+                            <TeenyiconsUpSolid className='ml-12 mt-2' />
                         </div>
-
-                        {/* <p className='text-black'>Posts</p> */}  
                         <a href={"/instructor/booked-sessions"}>
                             <p className='text-black font-serif text-lg'>Confirmed Sessions</p>
                         </a>
-
                     </div>
-
-                    {/* <div className='ml-auto mr-6'>
-                        <a href={"/instructor/create-session"}>
-                            <div className='bg-[#f6f6f6] w-10 h-10 -mt-2 rounded-full flex items-center justify-center hover:border hover:border-black'>
-                                <MaterialSymbolsAdd />
-                            </div>
-                        </a>
-                    </div>  */}
-
 
                     <div className="ml-auto mr-6 relative group">
                         <a href="/instructor/create-session">
@@ -253,9 +246,6 @@ const handleDelete = async (id: string) => {
                             Create
                         </div>
                     </div>
-
-
-
 
                 </div> 
             </div>   
@@ -284,7 +274,8 @@ const handleDelete = async (id: string) => {
                                     Update
                                 </button>
                                 <button 
-                                    onClick={() => handleDelete(session._id)}
+                                    // onClick={() => handleDelete(session._id)}
+                                    onClick={() => handleDeleteClick(session._id)}
                                     className='mt-2 mb-7 py-1 px-4 bg-red-500 border-2 border-white text-black rounded-full hover:border-[#2cc58a]  transition duration-300 transform hover:scale-105 active:scale-95'>
                                     Delete
                                 </button>
@@ -299,6 +290,19 @@ const handleDelete = async (id: string) => {
             
 
         </div>
+
+
+
+        {/* Modal */}
+        {isModalOpen && (
+            <Modal
+            title="Confirm Deletion"
+            onClose={() => setIsModalOpen(false)} // Close the modal without action
+            onConfirm={() => handleDelete(selectedSessionId!)} // Proceed with deletion
+            >
+            Are you sure you want to delete this session? 
+            </Modal>
+        )}
 
 
 

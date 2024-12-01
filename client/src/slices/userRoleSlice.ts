@@ -1,11 +1,7 @@
-// src/redux/yourSlice.js
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { IUserRole } from '../types/User';
 
-interface UserRoleState {
-  role: string | null; // or 'instructor' | 'student' | other roles as needed
-}
-
-const initialState: UserRoleState = {
+const initialState: IUserRole = {
   role: null,
 }
 
@@ -14,13 +10,13 @@ const userRoleSlice = createSlice({
   initialState,
   reducers: {
     setUserRole: (state, action: PayloadAction<string | null>) => {
-      state.role = action.payload; // Set the user role
+      state.role = action.payload; 
     },
     clearUserRole: (state) => {
-      state.role = null; // Clear the user role
+      state.role = null; 
     },
   },
 });
 
-export const { setUserRole, clearUserRole } = userRoleSlice.actions; // Export actions
-export default userRoleSlice.reducer; // Export reducer
+export const { setUserRole, clearUserRole } = userRoleSlice.actions; 
+export default userRoleSlice.reducer; 

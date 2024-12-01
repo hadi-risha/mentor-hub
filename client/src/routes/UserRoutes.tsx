@@ -26,7 +26,7 @@ import UpcomingSessions from "../pages/student/StdUpcomingSessions";
 import SingleSessionInfo from "../pages/student/StdSingleSessionInfo";
 import PaymentSuccess from "../pages/student/StdPaymentSuccess";
 import StudentBookSession from "../pages/student/StdBookSession";
-import AllSessions from "../pages/student/AllSessions";
+import AllSessions from "../pages/instructor/AllSessions";
 import ReservedSessionInfo from "../pages/student/ReservedSessionInfo";
 import NewProfile from "../pages/instructor/NewProfile";
 import NewCreateSession from "../pages/instructor/NewCreateSession";
@@ -89,15 +89,20 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
               <>
 
                 {/*   /**************** testing components *****************   */}
-                <Route path="/instructor/home" element={<ProtectedRoute><InstructornewHome /></ProtectedRoute>} />   {/* move to instructor */}
+                <Route path="/instructor/home" element={<ProtectedRoute><InstructornewHome /></ProtectedRoute>} /> 
                 <Route path="/instructor/profile" element={<ProtectedRoute><NewProfile /></ProtectedRoute>} />
                 <Route path="/instructor/update-profile" element={<ProtectedRoute><InstructorUpdateProfile /></ProtectedRoute>} />
                 <Route path="/instructor/create-session" element={<ProtectedRoute><NewCreateSession /></ProtectedRoute>} />  
                 <Route path="/instructor/session/:id" element={<ProtectedRoute><ISingleSessionDetails /></ProtectedRoute>} /> {/* single session info */}
                 <Route path="/instructor/update-session/:sessionId" element={<ProtectedRoute><UpdateSession /></ProtectedRoute>} />  
+                <Route path="/instructor/session-actions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />  {/* get instructor all available sessions for delete& update */}
+                <Route path="/instructor/all-sessions" element={<ProtectedRoute><AllSessions /></ProtectedRoute>} />  {/* get instructor all available sessions for delete& update */}
 
 
-                <Route path="/instructor/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />  {/* get instructor all available sessions */}
+
+
+
+                <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
 
 
 
@@ -129,7 +134,7 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
                 
                 {/* <Route path="/instructor/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />  get instructor all available sessions */}
-                <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
+                {/* <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} />  */}
                 
 
 
