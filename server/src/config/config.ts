@@ -31,7 +31,6 @@ interface Config {
 
 const config: Config = {
   mongoUrl: process.env.MONGO_URL || '',
-  
   port: Number(process.env.PORT) || 3001,
   host: process.env.HOST || 'localhost',
   emailUser: process.env.EMAIL_USER || '',
@@ -50,7 +49,6 @@ const config: Config = {
   awsRegion: process.env.AWS_REGION || '',
   awsAccessKey: process.env.AWS_ACCESS_KEY || '',
   awsSecretKey: process.env.AWS_SECRET_KEY || '',
-
 
   stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',

@@ -1,7 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
-import config from '../config/config.js';
-import { UserService } from '../services/userService.js';
+import config from '../config/config';
+import { UserService } from '../services/userService';
 import { IUser } from '../interfaces/userInterface';
 
 

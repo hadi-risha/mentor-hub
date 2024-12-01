@@ -62,5 +62,8 @@ export interface IUserRepository {
   instructorAvailableSessions( id: string ): Promise<ISession[] | null>;
   updateIsRoleChanged(id: string ): Promise<IUser | null>;
 
+  findBookingById(id: string): Promise<IBooking | null>;
+
+
 
 }

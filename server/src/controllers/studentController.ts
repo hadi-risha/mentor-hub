@@ -176,41 +176,98 @@ export const createBooking = async (req: Request, res: Response): Promise<Respon
   }
 }
 
-export const stripePayment = async (req: Request, res: Response): Promise<Response> => {
-  let token = req.header("Authorization"); 
-  const {id, role} = req.userData as IUserData;
-  console.log("id, role", id, role);
-  console.log("token in student payment", token);
+// export const stripePayment = async (req: Request, res: Response): Promise<Response> => {
+//   let token = req.header("Authorization"); 
+//   const {id, role} = req.userData as IUserData;
+//   console.log("id, role", id, role);
+//   console.log("token in student payment", token);
 
-  const { sessionId, selectedDate, selectedTimeSlot, concerns, amount } =req.body;
-  console.log("sessionId, selectedDate, selectedTimeSlot, concerns", sessionId, selectedDate, selectedTimeSlot, concerns);
-  console.log("amount",amount);
+//   const { sessionId, selectedDate, selectedTimeSlot, concerns, amount } =req.body;
+//   console.log("sessionId, selectedDate, selectedTimeSlot, concerns", sessionId, selectedDate, selectedTimeSlot, concerns);
+//   console.log("amount",amount);
+//   try {
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ['card'],
+//       line_items: [
+//           {
+//             price_data: {
+//                 currency: 'usd',
+//                 product_data: {
+//                     name: 'Session Booking', // Static product name
+//                 },
+//                 unit_amount: amount, // Amount in cents
+//             },
+//             quantity: 1,
+//           },
+//       ],
+//       mode: 'payment',
+//       success_url: `${config.frontendUrl}/student/payment-succes`, // Success page URL
+//       cancel_url: `${config.frontendUrl}/student/payment-cancel`,   // Cancel page URL
+//     });
+
+//     return res.status(HttpStatus.OK).json({ message: "Payment successfull", url: session.url });
+//   } catch (error) {
+//     console.error("Error creating booking:", error);
+//     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating booking:" });
+//   }
+// }
+
+
+export const createBookingAndPayment = async (req: Request, res: Response): Promise<Response> => {
+  const { sessionId, selectedDate, selectedTimeSlot, concerns, amount } = req.body;
+  const { id, role } = req.userData as IUserData;
+  
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await userService.findSessionById(sessionId);
+    if (!session) {
+      throw new Error("Session not found");
+    }
+
+    const paymentSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
-          {
-            price_data: {
-                currency: 'usd',
-                product_data: {
-                    name: 'Session Booking', // Static product name
-                },
-                unit_amount: amount, // Amount in cents
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Session Booking', // Static product name
             },
-            quantity: 1,
+            unit_amount: amount, // Amount in cents
           },
+          quantity: 1,
+        },
       ],
       mode: 'payment',
-      success_url: `${config.frontendUrl}/student/payment-succes`, // Success page URL
-      cancel_url: `${config.frontendUrl}/student/payment-cancel`,   // Cancel page URL
+      success_url: `${config.frontendUrl}/student/payment-success`,
+      cancel_url: `${config.frontendUrl}/student/payment-cancel`,
+      // success_url: `/student/payment-success`,
+      // cancel_url: `/student/payment-cancel`,
     });
 
-    return res.status(HttpStatus.OK).json({ message: "Payment successfull", url: session.url });
+    console.log("00000000    paymentSession---------------0000000", paymentSession.url);
+    console.log("00000000    paymentSession.id---------------0000000", paymentSession.id);
+
+    const booking = await userService.createBooking({
+      studentId: new mongoose.Types.ObjectId(id),
+      sessionId,
+      instructorId: session.instructorId,
+      date: selectedDate,
+      timeSlot: selectedTimeSlot,
+      concerns,
+      status: "booked",
+      stripePaymentCheckoutSessionId: paymentSession.id, // Save Stripe session ID
+    } as Partial<IBooking>);
+
+    console.log("booking", booking);
+
+
+    return res.status(HttpStatus.OK).json({ message: "Booking created successfully", url: paymentSession.url });
   } catch (error) {
-    console.error("Error creating booking:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating booking:" });
+    console.error("Error during payment creation:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating booking or payment." });
   }
 }
+
 
 export const switchUserRole = async (req: Request, res: Response): Promise<Response> => {
   let token = req.header("Authorization"); 
@@ -246,18 +303,47 @@ export const bookedSessions = async (req: Request, res: Response): Promise<Respo
   }
 }
 
-export const cancelSession = async (req: Request, res: Response): Promise<Response> => {
-  let token = req.header("Authorization"); 
-  const {id, role} = req.userData as IUserData;
-  console.log("id, role", id, role);
-  console.log("token in student payment", token);
+
+export const cancelBooking = async (req: Request, res: Response): Promise<Response> => {
+  const { bookingId } = req.body;
+  const { id } = req.userData as IUserData;
+
   try {
-    const bookedSessions = await userService.bookedSessions(id)
-    console.log("Booked sessions : ", bookedSessions);
+    const booking = await userService.findBookingById(bookingId);
+    if (!booking) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Booking not found" });
+    }
+
+    console.log("booking...", booking);
     
-    return res.status(HttpStatus.OK).json({ message: "Booked sessions fetched successfully", ...bookedSessions });
+
+    // Cancel the booking and update the status
+    booking.status = "cancelled";
+    await booking.save();
+
+    const checkoutSession = await stripe.checkout.sessions.retrieve( booking.stripePaymentCheckoutSessionId );
+    console.log("checkoutSession", checkoutSession);
+    
+
+    // Refund the payment if there was a successful payment
+    if ( checkoutSession ) {
+      try {
+
+        await stripe.refunds.create({
+
+          payment_intent: checkoutSession.payment_intent as string,
+        });
+        return res.status(HttpStatus.OK).json({ message: "Booking cancelled and payment refunded" });
+      } catch (refundError) {
+        console.error("Error processing refund:", refundError);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error processing refund" });
+      }
+    }
+
+    return res.status(HttpStatus.OK).json({ message: "Booking cancelled" });
+
   } catch (error) {
-    console.error("Error cancel session:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching booked sessions:" });
+    console.error("Error canceling booking:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error canceling booking" });
   }
 }

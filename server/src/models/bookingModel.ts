@@ -9,7 +9,7 @@ export interface IBooking extends Document {
     concerns?: string;
     status: "booked" | "completed" | "cancelled"; 
     bookedAt: Date; 
-    stripePaymentIntentId?: string;  
+    stripePaymentCheckoutSessionId: string;  
 }
 
 const bookingSchema: Schema<IBooking> = new mongoose.Schema(
@@ -51,7 +51,10 @@ const bookingSchema: Schema<IBooking> = new mongoose.Schema(
         type: Date,
         default: Date.now,
     },
-    
+    stripePaymentCheckoutSessionId: {
+        type: String, 
+        required: true,
+    },
   },
   { timestamps: true }
 );

@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
-// import { adminLogin } from '../../controllers/admin_controller/auth.js'
-import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware.js';
-import { AdminController } from '../../controllers/adminController.js';
+// import { adminLogin } from '../../controllers/admin_controller/auth'
+import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
+import { AdminController } from '../../controllers/adminController';
 
 
 const router = express.Router();

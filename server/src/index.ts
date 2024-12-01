@@ -1,5 +1,4 @@
 import express, { Express } from 'express';
-import bodyParser from "body-parser";
 import cors from 'cors';
 import helmet from "helmet";
 import session from 'express-session';
@@ -44,8 +43,8 @@ app.use(helmet.crossOriginResourcePolicy({policy: "cross-origin"}));
 
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 
-app.use(bodyParser.json({ limit: '30mb' }));
-app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
+app.use(express.json({ limit: '30mb' }));
+app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 app.use(cookieParser());
 

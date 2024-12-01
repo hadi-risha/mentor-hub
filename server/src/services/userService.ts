@@ -90,4 +90,9 @@ export class UserService {
     async updateIsRoleChanged(id: string ): Promise<IUser | null> {
         return this.userRepository.updateIsRoleChanged(id)
     }
+
+    
+    async findBookingById(id: string): Promise<IBooking | null> {
+        return this.userRepository.findBookingById(id);
+    }
 }

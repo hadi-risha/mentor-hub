@@ -267,5 +267,14 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+
+    async findBookingById(id: string): Promise<IBooking | null> {
+        try {
+            return await BookingModel.findById(id)
+        } catch (error) {
+            throw new Error(`Error finding booking by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
     
 }
