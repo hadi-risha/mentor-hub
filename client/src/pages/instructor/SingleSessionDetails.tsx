@@ -57,7 +57,9 @@ const ISingleSessionDetails = () => {
         const minuteText = minutes ? `${minutes} min` : '';
         return [hourText, minuteText].filter(Boolean).join(' ');
     };
+    
 
+      
     const formatTimeSlots = (timeSlots: string[], limit: number = 4): string => {
         const convertTo12HourFormat = (time24: string): string => {
             const [hours, minutes] = time24.split(':').map(Number);

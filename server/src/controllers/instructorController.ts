@@ -593,3 +593,39 @@ export const availableSessions = async (req: Request, res: Response): Promise<Re
 
 }
 
+
+
+export const sessionHistory = async (req: Request, res: Response): Promise<Response> => {
+  let token = req.header("Authorization"); 
+  const {id, role} = req.userData as IUserData;
+  console.log("id, role", id, role);
+  console.log("token ", token);
+  try {
+    const bookedSessions = await userService.instructorSessionHistory(id)
+    console.log("Booked sessions : ", bookedSessions);
+    
+    return res.status(HttpStatus.OK).json({ message: "Session history fetched successfully", historyData: bookedSessions });
+  } catch (error) {
+    console.error("Error fetching booked sessions:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching history:" });
+  }
+}
+
+
+export const searchSessions = async (req: Request, res: Response): Promise<Response> => {
+  const { query } = req.query as { query?: string }; // Accept `query` from request
+  const { id } = req.userData as IUserData;
+
+  if (!query) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "Query parameter is required" });
+  }
+
+  try {
+    const searchResults = await userService.instructorSearchSessions(query, id);
+    return res.status(HttpStatus.OK).json({ message: "Search results fetched successfully",  searchResults });
+
+  } catch (error) {
+    console.error("Error performing search:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error performing search" });
+  }
+}

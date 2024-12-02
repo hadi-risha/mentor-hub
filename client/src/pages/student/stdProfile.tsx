@@ -120,6 +120,11 @@ const StudentProfile = () => {
                         <a href={"/student/upcoming-sessions"}>
                             <p className='text-lg text-black font-serif'>Reserved Sessions</p>
                         </a>
+
+                        
+                        <a href={"/student/session-history"}>
+                            <p className='text-lg text-black font-serif'>Session History</p>
+                        </a>
                         <p className='text-lg text-black font-serif'>Posts</p>
                     </div>
 

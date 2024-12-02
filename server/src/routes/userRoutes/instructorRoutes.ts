@@ -1,5 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { getProfile, updateProfile, instructorHome, getSession, createSession, updateSession, deleteSession, switchUserRole, sessions, bookedSessions, availableSessions } from '../../controllers/instructorController';
+import { getProfile, updateProfile, instructorHome, getSession, createSession,
+     updateSession, deleteSession, switchUserRole, sessions, bookedSessions,
+      availableSessions, sessionHistory, searchSessions } from '../../controllers/instructorController';
 import { verifyToken } from '../../middleware/verifyUserToken';
 import { checkUserRole } from '../../middleware/checkUserRole';
 import multer from 'multer';
@@ -39,7 +41,13 @@ router.delete('/delete-session/:sessionId', verifyToken, checkUserRole('instruct
 router.post('/switch-role', verifyToken, checkUserRole('instructor'), asyncHandler(switchUserRole)); 
 router.get('/booked-sessions', verifyToken, checkUserRole('instructor'), asyncHandler(bookedSessions));  
 
-router.get('/available-sessions', verifyToken, checkUserRole('instructor'), asyncHandler(availableSessions));  
+router.get('/available-sessions', verifyToken, checkUserRole('instructor'), asyncHandler(availableSessions)); 
+
+router.get('/session-history', verifyToken, checkUserRole('instructor'), asyncHandler(sessionHistory));
+
+router.get('/sessions/search', verifyToken, checkUserRole('instructor'), asyncHandler(searchSessions));  
+
+
 
 
 

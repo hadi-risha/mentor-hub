@@ -96,7 +96,23 @@ export class UserService {
         return this.userRepository.findBookingById(id);
     }
 
-    async searchSessions(query: string): Promise<ISession[] | null> {
-        return this.userRepository.searchSessions(query);
+    async searchSessions(query: string, studentId: string ): Promise<ISession[] | null> {
+        return this.userRepository.searchSessions(query, studentId);
     }
+
+    async instructorSearchSessions(query: string, instructorId: string ): Promise<ISession[] | null> {
+        return this.userRepository.instructorSearchSessions(query, instructorId);
+    }
+
+    async sessionHistory(userId: string): Promise<IBooking[] | null> {
+        return this.userRepository.sessionHistory(userId);
+    }
+    async instructorSessionHistory(userId: string): Promise<IBooking[] | null> {
+        return this.userRepository.instructorSessionHistory(userId);
+    }
+
+    async pendingSessions(studentId: string): Promise<IBooking[] | null> {
+        return this.userRepository.pendingSessions(studentId);
+    }
+
 }

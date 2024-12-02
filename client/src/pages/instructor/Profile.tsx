@@ -163,6 +163,8 @@ const InstructorProfile = () => {
                         <a href={"/instructor/booked-sessions"}>
                             <p className='text-black'>Confirmed Sessions</p>
                         </a>
+
+                        
                         
                         {/* <p className='text-black'>Posts</p> */}
 

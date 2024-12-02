@@ -64,7 +64,14 @@ export interface IUserRepository {
 
   findBookingById(id: string): Promise<IBooking | null>;
 
-  searchSessions( query: string ): Promise<ISession[] | null>;
+  searchSessions( query: string, userId: string ): Promise<ISession[] | null>;
+  instructorSearchSessions( query: string, instructorId: string ): Promise<ISession[] | null>;
+
+  sessionHistory( id: string ): Promise<IBooking[] | null>;
+  instructorSessionHistory( id: string ): Promise<IBooking[] | null>;
+  pendingSessions( id: string ): Promise<IBooking[] | null>;
+
+
 
 
 

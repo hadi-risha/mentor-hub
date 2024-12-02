@@ -32,6 +32,8 @@ import StudentAllSessions from "../pages/student/AllSessions";
 import ReservedSessionInfo from "../pages/student/ReservedSessionInfo";
 import NewProfile from "../pages/instructor/NewProfile";
 import NewCreateSession from "../pages/instructor/NewCreateSession";
+import SessionHistory from "../pages/student/SessionHistory";
+import InstructorSessionHistory from "../pages/instructor/SessionHistory";
 
 
 interface UserRoutesProps {
@@ -81,6 +83,8 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
                 <Route path="/student/upcoming-sessions" element={<ProtectedRoute><UpcomingSessions /></ProtectedRoute>} />   
                 <Route path="/student/reserved-session/:id" element={<ProtectedRoute><ReservedSessionInfo /></ProtectedRoute>} /> 
+                <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />   
+
 
 
                 <Route path="*" element={<Navigate to="/student/home" replace />} />
@@ -105,6 +109,8 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
 
                 <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
+                <Route path="/instructor/session-history" element={<ProtectedRoute><InstructorSessionHistory /></ProtectedRoute>} /> 
+
 
 
 

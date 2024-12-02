@@ -1,45 +1,32 @@
-import { IcSharpPersonAdd, PrimeStarFill, AntDesignMessageFilled, FluentNotepadEdit16Filled, TeenyiconsUpSolid, SolarMenuDotsBold, IonPerson, LineiconsWorld, PhBagFill, IcRoundEmail, MdiEducationOutline, TypcnUserAdd, MaterialSymbolsAdd } from '../../assets/usersIcons/ProfileIcons'
-import instructor from '../../assets/instructor.png'
-import bg1 from '../../assets/bg-1.jpeg'
-import bg2 from '../../assets/userImgs/bg-2.jpeg'
-import bg3 from '../../assets/bg-3.jpeg'
-import bg4 from '../../assets/bg-4.jpeg'
-import bg5 from '../../assets/bg-5.jpeg'
-import bg6 from '../../assets/bg-6.jpeg'
-import bg7 from '../../assets/bg-7.jpeg'
-import bg8 from '../../assets/bg-8.jpeg'
-import bg9 from '../../assets/bg-9.jpeg'
-import bg10 from '../../assets/bg-10.jpeg'
-import bg11 from '../../assets/bg-11.jpeg'
-import studentImg from '../../assets/userImgs/student.png'
-import { IconParkSolidDownOne, CharmMenuKebab, EmojioneStar, EmojioneMonotoneStar } from '../../assets/usersIcons/HomeIcons';
-import { BxCalendar, FluentPeopleTeam48Regular, IcOutlineAccessTime, PhChalkboardTeacher } from '../../assets/usersIcons/SessionIcons'
+import { SolarMenuDotsBold, PrimeStarFill, AntDesignMessageFilled, FluentNotepadEdit16Filled, TeenyiconsUpSolid, IcSharpPersonAdd, TypcnUserAdd, MaterialSymbolsAdd } from '../../assets/usersIcons/ProfileIcons'
+import { BxCalendar, IcOutlineAccessTime, PhChalkboardTeacher } from '../../assets/usersIcons/SessionIcons'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../../utils/users/axiosInstance'
 import { useNavigate } from 'react-router-dom'
 import { FaUserCircle } from 'react-icons/fa'
+import bg4 from '../../assets/userImgs/bg-4.jpeg';
+import {  } from '../../assets/usersIcons/ProfileIcons'
 
 
-
-interface IBooking {
+interface ISession {
     _id: string;
-    studentId: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-    };
+    // studentId: string;
     sessionId: {
         _id: string;
         title: string;
         duration: string;
         fee: string;
         descriptionTitle: string;
+        coverImage: {
+            url: string;
+        };
     };
-    instructorId: {
+    studentId: {
         // _id: string;
         firstName: string;
         lastName: string;
+        email: string;
+        
     };
     date: string;
     timeSlot: string;
@@ -48,68 +35,94 @@ interface IBooking {
 }
 
 
-const BookedSessions = () => {
+const InstructorSessionHistory = () => {
     const navigate = useNavigate();  // Initialize navigate function
 
-    const [booking, setBooking] = useState<IBooking[]>([]); 
+    const [history, setHistory] = useState<ISession[]>([]); // Typed state
     const [loading, setLoading] = useState(true);
 
+
     const [profileData, setProfileData] = useState({
+        email: '',
         role: '',
         firstName: '',
         lastName: '',
+        about: '',
+        country: '',
         occupation: '',
         currentInstitution: '',
+        teachingViews: '',
+        achievements: '',
+        education: '',
+        experience: '',
         profilePic: '',
-    });
+      });
 
-    useEffect(() => {
+      useEffect(() => {
         async function fetchProfile() {
-            try {
-                const res = await axiosInstance.get('/instructor/profile');
-                console.log("res profile data in update all data------------",res.data);
-                console.log("res profile data in update data------------",res.data.message);
+          try {
+            const res = await axiosInstance.get('/instructor/profile');
+            // console.log("res profile data in update all data------------",res.data);
+            // console.log("res profile data in update data------------",res.data.message);
 
-                const {
-                    role,
-                    firstName, 
-                    lastName,
-                    occupation, 
-                    currentInstitution, 
-                    profilePicUrl } = res.data;
-
-                setProfileData({
-                    role: role || '',
-                    firstName: firstName || '',
-                    lastName: lastName || '',
-                    occupation: occupation || '',
-                    currentInstitution: currentInstitution || '',
-                    profilePic: profilePicUrl || '',
-                });
-            } catch (error) {
-                console.error("Error fetching profile:", error);
-            }
+            const { 
+                email, 
+                role, 
+                firstName, 
+                lastName } = res.data;
+    
+            const {  
+                about,
+                country,
+                occupation, 
+                currentInstitution, 
+                teachingViews, 
+                achievements, 
+                education, 
+                experience, 
+                profilePicUrl } = res.data;
+    
+    
+            setProfileData({
+              email: email || '',
+              role: role || '',
+              firstName: firstName || '',
+              lastName: lastName || '',
+              about: about || '',
+              country: country || '',
+              occupation: occupation || '',
+              currentInstitution: currentInstitution || '',
+              teachingViews: teachingViews || '',
+              achievements: achievements || '',
+              education: education || '',
+              experience: experience || '',
+              profilePic: profilePicUrl || '',
+            });
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+          }
         }
         fetchProfile();
-    }, []);
+      }, []);
 
 
 
     useEffect(() => {
-        async function fetchBookings() {
+        async function fetchHistory() {
           try {
-            const response = await axiosInstance.get("/instructor/booked-sessions"); // Adjust the endpoint if needed
+            const response = await axiosInstance.get("/instructor/session-history"); // Adjust the endpoint if needed
             
-            // console.log("instructor imageeeeeeeeeee url777777777777999999999999", response.data.session.image.url);
+            console.log("API Response   : ", response);
 
             // const sessions = Object.values(response.data).filter(
             //     (item) => typeof item === "object"
             //   );
 
 
-            const sessions = Object.values(response.data).filter(
-            (item): item is IBooking => typeof item === "object" && item !== null && "_id" in item
-            );
+            // const sessions = Object.values(response.data).filter(
+            // (item): item is ISession => typeof item === "object" && item !== null && "_id" in item
+            // );
+            const sessions = response.data.historyData || [];
         
               console.log("Parsed Sessions:", sessions);
             
@@ -119,14 +132,10 @@ const BookedSessions = () => {
             console.log("response.data:      2", response.data);
             console.log("response           3", response.data.booking);
             console.log("response           3", response.data.instructorId);
+            console.log("response           3", response.data.instructorId);
 
-
-
-            // session?.instructorId?.image?.key
-      
-            console.log("response           2", response.data.session);
             
-            setBooking(sessions); // Store the booking data
+            setHistory(sessions); // Store the booking data
             setLoading(false);
           } catch (error) {
             console.error('Failed to fetch session:', error);
@@ -134,8 +143,8 @@ const BookedSessions = () => {
           }
         };
       
-        console.log("booking------------------55", booking);
-        fetchBookings();
+        console.log("booking------------------55", history);
+        fetchHistory();
     }, []);
 
 
@@ -164,12 +173,12 @@ const BookedSessions = () => {
 
   return (
     <>
-      <div className='w-screen h-auto bg-white'>
+        <div className='w-screen h-auto bg-white'>
 
         <div className='bg-white w-10/12 h-48  ml-28 mt-5  rounded-tl-lg rounded-tr-lg shadow'>
             {/* first part */}
             <div className='w-full h-32 bg-[#fbcfb1] rounded-tl-lg rounded-tr-lg object-cover bg-center' >
-        
+
                 {/* profile photo section */}
                 <div className='flex w-full h-3 pl-10 pt-8'>
                     {profileData && profileData.profilePic ? (
@@ -224,13 +233,14 @@ const BookedSessions = () => {
                         <a href={"/instructor/session-actions"}>
                             <p className='text-black font-serif text-lg'>Session Actions</p>
                         </a>
-                        <div>
-                            <p className='text-primary-orange font-serif text-lg'>Confirmed Sessions</p>
-                            <TeenyiconsUpSolid className='mt-2 ml-16' />
-                        </div>
-                        <a href={"/instructor/session-history"}>
-                            <p className='text-black font-serif text-lg'>Session History</p>
+                       
+                        <a href={"/instructor/booked-sessions"}>
+                            <p className='text-black font-serif text-lg'>Confirmed Sessions</p>
                         </a>
+                        <div>
+                            <p className='text-primary-orange font-serif text-lg'>Session History</p>
+                            <TeenyiconsUpSolid className='mt-2 ml-12' />
+                        </div>
                     </div>
 
                     <div className="ml-auto mr-6 relative group">
@@ -249,59 +259,86 @@ const BookedSessions = () => {
         </div>
 
 
-        {/* UPCOMING SESSIONS */}
+        {/* user info */}
         <div className="ml-28 mr-36 mt-8 mb-36 h-auto py-16 px-14 shadow-2xl grid grid-cols-4 gap-3">
 
-            {loading ? (
+
+        {loading ? (
                 <p>Loading...</p>
-            ) : booking.length > 0 ? (
-                booking.map((session) => (
+            ) : history.length > 0 ? (
+                history.map((session) => (
                 <div
                     key={session._id}
-                    // className="w-3/12 h-80 ml-20 bg-blue-50 border rounded-md py-4 px-7 space-y-4"
-                    className='px-10 py-10 relative w-[280px] h-[350px] rounded-2xl border-2 border-black'
+                    className='px-8 py-10 relative w-[280px] h-[350px] rounded-2xl border-2 border-black'
                 >
                     {/* Session Title */}
                     <p className="text-black font-serif">{session.sessionId.title}</p>
 
                     {/* Instructor Name */}
                     <div className="flex space-x-3 pt-10">
-                        <PhChalkboardTeacher />
-                        <p className="text-gray-600 text-sm"> Student:
-                            {session.studentId.firstName} {session.studentId.lastName}
+                        {/* <PhChalkboardTeacher /> */}
+                        <p className="text-gray-600 text-sm"> Student: {` `}
+                            {session.studentId?.firstName} {session.studentId?.lastName}
                         </p>
                     </div>
                     <hr className="mt-3 border border-gray-300" />
 
                     {/* Time Slot */}
-                    <div className="mt-5 flex space-x-3">
-                        <IcOutlineAccessTime />
-                        <p className="text-gray-600 text-sm">{formatTimeSlot(session?.timeSlot || '00:00')}</p>
+                    <div className="mt-5 flex justify-between space-x-3 ">
+                        {/* <IcOutlineAccessTime /> */}
+                        
+                        {session.status === 'cancelled' ? (
+                            <div className='space-y-5'>
+                                <div className='flex '>
+                                    <p className="text-gray-700 text-sm font-semibold">Date: </p>
+                                    <p className="text-gray-600 text-sm">  {formatDate(session.date)}</p>
+                                </div>
+
+                                <div className='flex'>
+                                    <p className="text-gray-700 text-sm font-semibold"> Time: </p>
+                                    <p className="text-gray-600 text-sm">{formatTimeSlot(session?.timeSlot || '00:00')}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className='space-y-5'>
+                                
+                                <div className='flex'>
+                                    <p className="text-gray-700 text-sm font-semibold">Conducted on:</p>
+                                    <p className="text-gray-600 text-sm">  {formatDate(session.date)}</p>
+                                </div>
+
+                                <div className='flex'>
+                                    <p className="text-gray-700 text-sm font-semibold">Time:</p>
+                                    <p className="text-gray-600 text-sm">  {formatTimeSlot(session?.timeSlot || '00:00')}</p>
+                                </div>
+
+                            </div>
+                        )}
+
                     </div>
                     <hr className="mt-3 border border-gray-300" />
 
-                    <div className="mt-5 flex space-x-3">
-                        <BxCalendar />
-                        <p className="text-gray-600 text-sm">{formatDate(session.date)}</p>
+                    <div
+                        className="ml-8 mt-5 bg-white text-black font-serif text-sm px-4 py-1 rounded-2xl items-center "
+                    >
+                        Status: {session.status}
                     </div>
-
-                    {/* View Details Button */}
-                    <button 
-                        onClick={() => handleViewDetails(session.sessionId._id)} // Call the navigate function
-                        className="mt-5 bg-blue-800 text-sm px-4 py-1 rounded-2xl items-center ml-10">
-                    View Details
-                    </button>
                 </div>
                 ))
             ) : (
-                <p>No upcoming sessions available.</p>
+                <p>No sessions available.</p>
             )}
-            
+
+
+
         </div>
 
-      </div>
+
+
+
+        </div>
     </>
   )
 }
 
-export default BookedSessions;
+export default InstructorSessionHistory;

@@ -144,7 +144,7 @@ const NewProfile = () => {
                         }
                     </div>
 
-                    <div className='flex space-x-20 ml-40'>
+                    <div className='flex space-x-20 ml-20'>
                         <div>
                             <p className='text-primary-orange font-serif text-lg'>About</p>
                             <TeenyiconsUpSolid className='mt-2 ml-3' />
@@ -156,6 +156,10 @@ const NewProfile = () => {
 
                         <a href={"/instructor/booked-sessions"}>
                             <p className='text-black font-serif text-lg'>Confirmed Sessions</p>
+                        </a>
+
+                        <a href={"/instructor/session-history"}>
+                            <p className='text-black font-serif text-lg'>Session History</p>
                         </a>
                         
                     </div>

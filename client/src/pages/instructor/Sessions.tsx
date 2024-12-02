@@ -222,7 +222,7 @@ const handleDelete = async (id: string) => {
                         }
                     </div>
 
-                    <div className='flex space-x-20 ml-40'>
+                    <div className='flex space-x-20 ml-20'>
                         <a href={"/instructor/profile"}>
                             <p className='text-black font-serif text-lg'>About</p>
                         </a>
@@ -232,6 +232,10 @@ const handleDelete = async (id: string) => {
                         </div>
                         <a href={"/instructor/booked-sessions"}>
                             <p className='text-black font-serif text-lg'>Confirmed Sessions</p>
+                        </a>
+
+                        <a href={"/instructor/session-history"}>
+                            <p className='text-black font-serif text-lg'>Session History</p>
                         </a>
                     </div>
 

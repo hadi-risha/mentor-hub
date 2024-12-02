@@ -1,5 +1,4 @@
 import  { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import axiosInstance from '../../utils/users/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,11 +47,9 @@ interface IBooking {
 const AllSessions = () => {
   const navigate = useNavigate();
 
-  const [sessions, setSessions] = useState<ISession[]>([]); // Typed state
+  const [sessions, setSessions] = useState<ISession[]>([]); 
   const [loading, setLoading] = useState(true);
-
-  const [bookings, setBooking] = useState<IBooking[]>([]); // Typed state
-
+  const [bookings, setBooking] = useState<IBooking[]>([]); 
 
   useEffect(() => {
     async function fetchSessions() {
@@ -60,7 +57,7 @@ const AllSessions = () => {
         const response = await axiosInstance.get("/student/sessions");
         console.log("Response data:", response.data);
   
-        const sessions = response.data.sessions || []; // Directly access sessions array
+        const sessions = response.data.sessions || []; 
   
         if (!Array.isArray(sessions)) {
           console.error('Unexpected sessions format:', response.data);
@@ -83,7 +80,7 @@ const AllSessions = () => {
   useEffect(() => {
     async function fetchBookings() {
       try {
-        const response = await axiosInstance.get("/student/booked-sessions"); // Adjust the endpoint if needed
+        const response = await axiosInstance.get("/student/pending-sessions"); // Adjust the endpoint if needed  
         
         console.log("instructor imageeeeeeeeeee url777777777777999999999999", response);
 
@@ -93,8 +90,6 @@ const AllSessions = () => {
         );
     
         console.log("Parsed Sessions:", bookings);
-        
-
         
         console.log("response           1", response);
         console.log("response.data:      2", response.data);
@@ -112,33 +107,23 @@ const AllSessions = () => {
   
     console.log("bookings------------------55", bookings);
     fetchBookings();
-}, []);
+  }, []);
 
   // Get booked session IDs
   const bookedSessionIds = bookings.map((booking) => booking.sessionId._id);
 
+  // Filter non-booked sessions
+  const nonBookedSessions = sessions.filter(
+    (session) => !bookedSessionIds.includes(session._id)
+  );
 
-    // Filter non-booked sessions
-    const nonBookedSessions = sessions.filter(
-      (session) => !bookedSessionIds.includes(session._id)
-    );
-
-    
-
-
-
-
-      // Handle click event to navigate to session details page
+  
+  // Handle click event to navigate to session details page
   const handleViewDetails = (sessionId: string) => {
     navigate(`/student/session/${sessionId}`);
   };
 
 
-
-
-
-
-  
 
   return (
     <>
@@ -168,7 +153,7 @@ const AllSessions = () => {
                     </div>
                 ))
             ) : (
-                <p>No upcoming sessions available.</p>
+                <p>No sessions available.</p>
             )}
         </div>
 

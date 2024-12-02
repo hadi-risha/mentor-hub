@@ -6,7 +6,7 @@ import { FaUserCircle } from 'react-icons/fa';
 
 
 
-interface IBooking {
+interface ISession {
     _id: string;
     studentId: string;
     sessionId: {
@@ -31,12 +31,14 @@ interface IBooking {
 }
 
 
-const UpcomingSessions = () => {
+const SessionHistory = () => {
     const navigate = useNavigate();  // Initialize navigate function
 
 
 
-    const [booking, setBooking] = useState<IBooking[]>([]); // Typed state
+    const [history, setHistory] = useState<ISession[]>([]); // Typed state
+    const [loading, setLoading] = useState(true);
+
 
     const [profileData, setProfileData] = useState({
         email: '',
@@ -45,10 +47,6 @@ const UpcomingSessions = () => {
         lastName: '',
         profilePic: '',
       });
-
-
-  const [loading, setLoading] = useState(true);
-
 
 
 
@@ -86,9 +84,9 @@ const UpcomingSessions = () => {
 
 
     useEffect(() => {
-        async function fetchBookings() {
+        async function fetchHistory() {
           try {
-            const response = await axiosInstance.get("/student/booked-sessions"); // Adjust the endpoint if needed
+            const response = await axiosInstance.get("/student/session-history"); // Adjust the endpoint if needed
             
             console.log("instructor imageeeeeeeeeee url777777777777999999999999", response);
 
@@ -98,7 +96,7 @@ const UpcomingSessions = () => {
 
 
             const sessions = Object.values(response.data).filter(
-            (item): item is IBooking => typeof item === "object" && item !== null && "_id" in item
+            (item): item is ISession => typeof item === "object" && item !== null && "_id" in item
             );
         
               console.log("Parsed Sessions:", sessions);
@@ -117,7 +115,7 @@ const UpcomingSessions = () => {
       
             console.log("response           2", response.data.session);
             
-            setBooking(sessions); // Store the booking data
+            setHistory(sessions); // Store the booking data
             setLoading(false);
           } catch (error) {
             console.error('Failed to fetch session:', error);
@@ -125,8 +123,8 @@ const UpcomingSessions = () => {
           }
         };
       
-        console.log("booking------------------55", booking);
-        fetchBookings();
+        console.log("booking------------------55", history);
+        fetchHistory();
     }, []);
 
 
@@ -202,13 +200,14 @@ const UpcomingSessions = () => {
                         <a href={"/student/profile"}>
                             <p className='text-lg font-serif text-black'>About</p>
                         </a>
+                        
+                        <a href={"/student/upcoming-sessions"}>
+                            <p className='text-lg text-black font-serif'>Reserved Sessions</p>
+                        </a>
                         <div>
-                            <p className='text-lg font-serif text-primary-orange'>Reserved Sessions</p>
+                            <p className='text-lg font-serif text-primary-orange'>Session History</p>
                             <TeenyiconsUpSolid className='mt-2 ml-14' />
                         </div>
-                        <a href={"/student/session-history"}>
-                            <p className='text-lg text-black font-serif'>Session History</p>
-                        </a>
                         <p className='text-lg font-serif text-black'>Posts</p>
                     </div>
 
@@ -230,8 +229,8 @@ const UpcomingSessions = () => {
         <div className="ml-32 mr-32 mt-8 mb-36 h-auto py-16 px-7 shadow-md grid grid-cols-3 gap-6">
             {loading ? (
                 <p>Loading...</p>
-            ) : booking.length > 0 ? (
-                booking.map((session) => (
+            ) : history.length > 0 ? (
+                history.map((session) => (
                     <div key={session._id} className='relative w-[380px] h-[460px] rounded-2xl border-2 border-black'>
                         <div className='absolute inset-0 bg-black opacity-50 rounded-2xl'></div> {/* Black overlay */}
                         <div className='w-full h-full rounded-2xl' style={{ backgroundImage: `url(${session.sessionId.coverImage.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
@@ -240,6 +239,7 @@ const UpcomingSessions = () => {
                             <p className='text-lg mb-5'>Mentor: {session.instructorId.firstName} {session.instructorId.lastName}</p>
                             <p className='text-lg mb-5'>Date: {formatDate(session.date)}</p>
                             <p className='text-lg mb-5'>Time: {session.timeSlot}</p>
+                            {/* <p className='bg-red-400'>{session.status}</p> */}
                             
                             {/* View Details Button */}
                             {/* <button 
@@ -254,11 +254,10 @@ const UpcomingSessions = () => {
                                 </div>
 
                             ) : (
-                                <button 
-                                    onClick={() => handleViewDetails(session._id, session.sessionId._id, session.date, session.timeSlot)}
-                                    className='mt-2 mb-7 py-1 px-4 bg-[#f4c857] text-black rounded-full hover:bg-[#2cc58a] transition duration-300 transform hover:scale-105 active:scale-95'>
-                                    View Details
-                                </button> 
+                                <div 
+                                    className='mt-2 mb-7 w-7/12 py-1 px-5 bg-red-500 text-black rounded-full'>
+                                    Session Completed
+                                </div>
                             )}
 
 
@@ -277,4 +276,4 @@ const UpcomingSessions = () => {
   )
 }
 
-export default UpcomingSessions;
+export default SessionHistory;

@@ -1,7 +1,9 @@
 import { IUser, IUserRepository } from '../interfaces/userInterface';
 import { UserModel } from '../models/userModel';
 import { ISession, SessionModel } from '../models/sessionModel';
-import { BookingModel, IBooking } from '../models/bookingModel'
+import { BookingModel, IBooking } from '../models/bookingModel';
+import mongoose from 'mongoose';
+
 
 
 
@@ -217,6 +219,10 @@ export class UserRepository implements IUserRepository {
     }
 
 
+
+    
+
+
     async instructorBookedSessions(id: string): Promise<IBooking[] | null> {
         try {
             return await BookingModel.find({ instructorId: id }) // Ensure `studentId` is passed as an object
@@ -277,26 +283,182 @@ export class UserRepository implements IUserRepository {
     }
 
 
-    async searchSessions(query: string): Promise<ISession[] | null> {
+    async searchSessions(query: string, userId: string): Promise<any[]> {
         try {
-          const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex for partial matches
-          return await SessionModel.find({
-            $or: [
-              { title: searchRegex },
-              { description: searchRegex },
-              { "instructorId.firstName": searchRegex },
-              { "instructorId.lastName": searchRegex },
-              { "category": searchRegex }
-            ],
-          })
-            .populate({
-              path: 'instructorId',
-              select: 'firstName lastName email', // Fetch required instructor fields
-            })
-            .sort({ createdAt: -1 }); // Sort results by creation date
+            const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex for partial matches
+    
+            const sessions = await SessionModel.aggregate([
+                { 
+                    $match: { 
+                        $or: [
+                            { title: searchRegex },
+                            { description: searchRegex },
+                            { category: searchRegex }
+                        ] 
+                    } 
+                },
+                {
+                    $lookup: {
+                        from: 'bookings', // Name of the bookings collection
+                        localField: '_id',
+                        foreignField: 'sessionId',
+                        as: 'bookings'
+                    }
+                },
+                {
+                    $addFields: {
+                        bookingStatus: {
+                            $arrayElemAt: [
+                                {
+                                    $filter: {
+                                        input: "$bookings",
+                                        as: "booking",
+                                        cond: { $eq: ["$$booking.studentId", new mongoose.Types.ObjectId(userId)] }
+                                    }
+                                },
+                                0
+                            ]
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        bookings: 0, // Exclude the entire bookings array
+                    }
+                },
+                { $sort: { createdAt: -1 } } // Sort by creation date
+            ]);
+    
+            return sessions;
         } catch (error) {
-          throw new Error(`Failed to perform search: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            throw new Error(`Failed to perform search: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-      }
+    }
+
+
+
+    async instructorSearchSessions(query: string, instructorId: string): Promise<any[]> {
+        try {
+            const searchRegex = new RegExp(query, 'i'); // Case-insensitive regex for partial matches
+    
+            // Convert instructorId to mongoose.Types.ObjectId if it's not already in that format
+            const instructorObjectId = new mongoose.Types.ObjectId(instructorId);
+    
+            const sessions = await SessionModel.aggregate([
+                { 
+                    $match: { 
+                        instructorId: instructorObjectId, // Filter sessions by instructorId
+                        $or: [
+                            { title: searchRegex },
+                            { description: searchRegex },
+                            { category: searchRegex }
+                        ] 
+                    } 
+                },
+                {
+                    $lookup: {
+                        from: 'bookings', // Name of the bookings collection
+                        localField: '_id',
+                        foreignField: 'sessionId',
+                        as: 'bookings'
+                    }
+                },
+                {
+                    $addFields: {
+                        bookingStatus: {
+                            $arrayElemAt: [
+                                {
+                                    $filter: {
+                                        input: "$bookings",
+                                        as: "booking",
+                                        cond: { $eq: ["$$booking.studentId", instructorObjectId] } // Filter bookings by studentId (use userId here if necessary)
+                                    }
+                                },
+                                0
+                            ]
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        bookings: 0, // Exclude the entire bookings array
+                    }
+                },
+                { $sort: { createdAt: -1 } } // Sort by creation date
+            ]);
+    
+            return sessions;
+        } catch (error) {
+            throw new Error(`Failed to perform search: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+    
+
+
+    async sessionHistory(userId: string): Promise<IBooking[] | null> {
+        try {
+            return await BookingModel.find({ 
+                userId, 
+                status: { $in: ['completed', 'cancelled'] }  // Filter by completed or cancelled status
+            })
+            .sort({ createdAt: -1 }) // Sort bookings by creation date, descending
+            .populate({
+                path: 'instructorId', // Populate instructor details
+                select: 'firstName lastName email', // Fetch only necessary fields
+            })
+            .populate({
+                path: 'sessionId', // Populate session details
+                select: '_id title duration fee descriptionTitle coverImage.url', // Fetch required fields
+            });
+        } catch (error) {
+            throw new Error(`Failed to fetch bookings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }    
+    }
+
+    async instructorSessionHistory(userId: string): Promise<IBooking[] | null> {
+        try {
+            return await BookingModel.find({ 
+                instructorId: userId, 
+                status: { $in: ['completed', 'cancelled'] }  // Filter by completed or cancelled status
+            })
+            .sort({ createdAt: -1 }) // Sort bookings by creation date, descending
+            .populate({
+                path: 'studentId', // Populate instructor details
+                select: 'firstName lastName email', // Fetch only necessary fields
+            })
+            .populate({
+                path: 'sessionId', // Populate session details
+                select: '_id title duration fee descriptionTitle coverImage.url', // Fetch required fields
+            });
+        } catch (error) {
+            throw new Error(`Failed to fetch bookings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }    
+    }
+
+
+
+    async pendingSessions(studentId: string): Promise<IBooking[] | null> {
+        try {
+            return await BookingModel.find({ 
+                studentId,
+                status: { $in: ['booked'] } 
+             }) // Ensure `studentId` is passed as an object
+            .sort({ createdAt: -1 }) // Sort bookings by creation date, descending
+            .populate({
+                path: 'instructorId', // Populate instructor details
+                select: 'firstName lastName email', // Fetch only necessary fields
+            })
+            .populate({
+                path: 'sessionId', // Populate session details
+                select: '_id title duration fee descriptionTitle coverImage.url', // Fetch required fields
+            });
+
+        } catch (error) {
+            throw new Error(`Failed to fetch bookings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+    
     
 }

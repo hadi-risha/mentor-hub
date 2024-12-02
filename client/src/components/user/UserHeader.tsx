@@ -1,6 +1,6 @@
 import { FaUserCircle } from 'react-icons/fa';
 import { FaSearch } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import  { logout }  from '../../slices/loginSlice';
 import { useDispatch } from 'react-redux';
 import Modal from '../../utils/users/userLogout';
@@ -8,10 +8,20 @@ import { IconParkSolidDownOne, LetsIconsCloseRound, RiLogoutCircleRLine }  from 
 import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/users/axiosInstance';
 
+
+interface IBookingStatus {
+  status: "booked" | "completed" | "cancelled";
+  studentId?: string;
+  date?: string;
+  timeSlot?: string;
+}
+
 interface ISearchSession {
   _id: string;
   title: string;
   description: string;
+  coverImage: { url: string };
+  bookingStatus?: IBookingStatus;
 }
 
 
@@ -28,6 +38,8 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ISearchSession[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);  // State to toggle search result visibility
+
 
   const [profileData, setProfileData] = useState({
     email: '',
@@ -104,21 +116,55 @@ const Header = () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
+    setShowResults(true);  // Show results when searching starts
+
     try {
-      const response = await axiosInstance.get(`student/sessions/search`, {
-        params: { query: searchQuery },
-      });
-      setSearchResults(response.data.data);
+      let response;
 
-      console.log(" serach-----------------response.data.data", response.data.data);
-      console.log(" serach-----------------response", response);
+      if (profileData.role === 'student') {
+         response = await axiosInstance.get(`student/sessions/search`, {
+          params: { query: searchQuery },
+        });
 
+
+        console.log("student serach result", response);
+        
+        
+      }else if (profileData.role === 'instructor') {
+        console.log("searching in instructor----------------------------------------------------------------------");
+        
+         response = await axiosInstance.get(`instructor/sessions/search`, {
+          params: { query: searchQuery },
+        });
+        console.log("instructor serach result", response);
+        console.log("instructor serach", response.data.searchResults);
+
+      }
+      
+      setSearchResults(response?.data?.searchResults);
       
     } catch (error) {
       console.error("Error searching sessions:", error);
     } finally {
       setIsSearching(false);
     }
+  };
+
+
+  const handleCloseSearchResults = () => {
+    setShowResults(false);
+    setSearchQuery("");  // Optional: Clear search query when closing
+  };
+
+  const handleArrowClick = () => {
+    setShowResults(false);  // Close search results on arrow button click
+
+  };
+
+  const handleInstructorArrowClick = (sessionId: string) => {
+    setShowResults(false); 
+    navigate(`/instructor/session/${sessionId}`);
+
   };
 
 
@@ -169,15 +215,51 @@ const Header = () => {
           </button>
         </div>
 
+ 
+
         {isSearching && <p>Loading...</p>}
-        <div className="search-results">
-          {searchResults.map((session) => (
-            <div key={session?._id} className="search-result-item">
-              <h3>{session.title}</h3>
-              <p>{session.description}</p>
+        {showResults && (
+            <div className="search-results absolute ml-[26%] mt-12 w-[370px] bg-white shadow-lg space-y-4 h-auto px-4 py-10 z-50">
+              
+            <button className="absolute top-0 right-4 p-2 cursor-pointer" onClick={handleCloseSearchResults}>
+              <span className="text-gray-400 text-3xl hover:text-black">×</span>
+            </button>
+
+            {Array.isArray(searchResults) && searchResults.length === 0 && (
+                <p className="text-center text-gray-500">No results found</p>
+              )}
+
+              {Array.isArray(searchResults) &&
+                searchResults.map((session) => (
+                  <div key={session._id} className="search-result-item px-7 py-5 border border-gray-600 rounded-md flex justify-between">
+                    <img src={session.coverImage.url} alt={session.title} className="session-image w-7 h-7 rounded-full object-cover" />
+                    <h3 className='text-xs w-40 text-black'>{session.title}</h3>
+
+                  { profileData.role === 'student' ? (
+                      <Link to={session.bookingStatus?.status === "booked" ? `/student/reserved-session/${session._id}` : `/student/session/${session._id}`}>
+                      <button onClick={handleArrowClick} className='border border-gray-400 w-6 h-6 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                        <span className="text-gray-400 text-sm hover:text-blue-700">→</span>
+                      </button>
+                    </Link>
+                    ) : (
+                      // <Link to={`/instructor/session/${session._id}`}>  
+                        <button onClick={() => handleInstructorArrowClick(session?._id)} className='border border-gray-400 w-6 h-6 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                          <span className="text-gray-400 text-sm hover:text-blue-700">→</span>
+                        </button>
+                      // </Link>
+                    )
+
+                  }
+                  </div>
+                ))}
             </div>
-          ))}
-        </div>
+          )}
+
+
+
+        
+
+        
 
         <div className="flex space-x-3">
           <li className="flex items-center">
@@ -206,6 +288,9 @@ const Header = () => {
             </a>
           </li>
         </div>
+
+
+        
 
 
         {/* Dropdown Menu */}

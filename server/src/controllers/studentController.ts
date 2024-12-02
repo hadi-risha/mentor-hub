@@ -358,11 +358,49 @@ export const searchSessions = async (req: Request, res: Response): Promise<Respo
   }
 
   try {
-    const searchResults = await userService.searchSessions(query);
-    return res.status(HttpStatus.OK).json({ message: "Search results fetched successfully", data: searchResults });
+    const searchResults = await userService.searchSessions(query, id);
+    return res.status(HttpStatus.OK).json({ message: "Search results fetched successfully",  searchResults });
 
   } catch (error) {
     console.error("Error performing search:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error performing search" });
+  }
+}
+
+
+export const sessionHistory = async (req: Request, res: Response): Promise<Response> => {
+  let token = req.header("Authorization"); 
+  const {id, role} = req.userData as IUserData;
+  console.log("id, role", id, role);
+  console.log("token in student payment", token);
+  try {
+    const bookedSessions = await userService.sessionHistory(id)
+    console.log("Booked sessions : ", bookedSessions);
+    
+    return res.status(HttpStatus.OK).json({ message: "Session history fetched successfully", ...bookedSessions });
+  } catch (error) {
+    console.error("Error fetching booked sessions:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching history:" });
+  }
+}
+
+
+
+export const pendingSessions = async (req: Request, res: Response): Promise<Response> => {
+  let token = req.header("Authorization"); 
+  const {id, role} = req.userData as IUserData;
+  console.log("id, role", id, role);
+  console.log("token in student payment", token);
+  try {
+    const bookedSessions = await userService.pendingSessions(id)
+    // const bookedSessions = await userService.bookedSessions(id)
+
+    
+    console.log("Booked sessions : ", bookedSessions);
+    
+    return res.status(HttpStatus.OK).json({ message: "pending sessions fetched successfully", ...bookedSessions });
+  } catch (error) {
+    console.error("Error fetching booked sessions:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching pending sessions:" });
   }
 }
