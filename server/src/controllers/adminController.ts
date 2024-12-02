@@ -114,10 +114,90 @@ export class AdminController {
       console.error("Error updating user role:", error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error updating user role:" });
     }
-
-
-
   }
+
+
+
+  public async createNotification(req: Request, res: Response): Promise<Response> {
+    try {
+      const { title, message,  } = req.body;
+      const notificationData = { title, message };
+
+      const newNotification = await this.adminService.createNotification(notificationData)
+      return res.status(HttpStatus.CREATED).json({ message: "Notification created successfully", newNotification,});
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating notification:" });
+    }
+  }
+
+
+
+
+
+  public async updateNotification(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const { title, message } = req.body;
+
+      const notificationData = { title, message };
+
+      const updatedNotification = await this.adminService.updateNotification(id, notificationData);
+
+
+      return res.status(HttpStatus.OK).json({ message: "Notification updated successfully", updatedNotification,});
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error updating notification:" });
+    }
+  }
+
+
+  public async deleteNotification(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const deleted = await this.adminService.deleteNotification(id);
+
+      if (!deleted) {
+        // If no notification was found and deleted
+        return res.status(HttpStatus.NOT_FOUND).json({ message: "Notification not found" });
+      }
+      return res.status(HttpStatus.NO_CONTENT).json({ message: "Notification deleted successfully"});
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error deleting notification:" });
+    }
+  }
+
+
+  public async getNotifications(req: Request, res: Response): Promise<Response> {
+    try {
+      const notifications = await this.adminService.getNotifications();
+
+      return res.status(HttpStatus.OK).json({ message: "Notifications fetched successfully", notifications,});
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching notifications:" });
+    }
+  }
+
+  public async getNotification(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const notification = await this.adminService.getNotification(id);
+      if (!notification) {
+        return res.status(HttpStatus.NOT_FOUND).json({ message: "Notification not found" });
+      }
+
+      return res.status(HttpStatus.OK).json({ message: "Notification fetched successfully", notification,});
+    } catch (error) {
+      console.error("Error fetching notification:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching notification:" });
+    }
+  }
+
 
 
 

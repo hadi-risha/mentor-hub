@@ -1,6 +1,6 @@
 import developerImage from "../../assets/adminImgs/photo-hadi.jpg";
 import { IconParkOutlineHandleRound, IconParkOutlineLeft, MingcuteDownLine } from '../../assets/adminIcons/NavbarIcons';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const AdminNavbar = () => {
     // const location = useLocation();
@@ -80,7 +80,9 @@ const AdminNavbar = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <a href="/dashboard">
+                                    
+
+                                        <Link to="/admin/dashboard">
                                         <div className='flex items-center w-full h-14 px-8 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound />
@@ -88,7 +90,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-28'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </>
                                 )
                             }
@@ -117,7 +119,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <>
                                     <div>
-                                        <a href="/user-management">
+                                        <Link to="/admin/user-management">
                                         <div className='flex items-center w-full h-14 px-8 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound />
@@ -125,7 +127,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-14'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div>
                                     </>
                                 )
@@ -155,7 +157,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <>  
                                     <div>
-                                        <a href="/community-management">
+                                        <Link to="/admin/community-management">
                                         <div className='flex items-center w-full h-14 px-8 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound className='w-7' />
@@ -163,7 +165,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-0'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div> 
                                     </>
                                 )
@@ -193,7 +195,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <> 
                                     <div>
-                                        <a href="/reporting-analytics">
+                                        <Link to="/admin/reporting-analytics">
                                         <div className='flex items-center w-full h-14 px-7 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound className='w-7' />
@@ -201,7 +203,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-12'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div> 
                                     </>
                                 )
@@ -231,7 +233,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <> 
                                     <div>
-                                        <a href="/ai-management">
+                                        <Link to="/admin/ai-management">
                                         <div className='flex items-center w-full h-14 px-8 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound/>
@@ -239,7 +241,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-16'><IconParkOutlineLeft className='ml-2' /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div> 
                                     </>
                                 )
@@ -269,7 +271,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <> 
                                     <div>
-                                        <a href="/accountType-management">
+                                        <Link to="/admin/account-management">
                                         <div className='flex items-center w-full h-14 px-8 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound className='w-7' />
@@ -277,7 +279,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-14'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div> 
                                     </>
                                 )
@@ -307,7 +309,7 @@ const AdminNavbar = () => {
                                 ) : (
                                     <> 
                                     <div>
-                                        <a href="/notification-management">
+                                        <Link to="/admin/notification-management">
                                         <div className='flex items-center w-full h-14 px-7 bg-turquoise-blue cursor-pointer'>
                                             <li className="flex items-center w-full space-x-3">
                                                 <IconParkOutlineHandleRound className='w-7' />
@@ -315,7 +317,7 @@ const AdminNavbar = () => {
                                                 <div className='pl-0'><IconParkOutlineLeft /></div>
                                             </li>
                                         </div>
-                                        </a>
+                                        </Link>
                                     </div> 
                                     </>
                                 )

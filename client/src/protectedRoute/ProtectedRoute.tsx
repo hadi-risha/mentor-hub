@@ -7,12 +7,11 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const userToken = useAppSelector(
     (state) => state.login?.token || state.otp.token  || localStorage.getItem('token')  // Get token from Redux
   );
-
   const isBlocked = useAppSelector(
     (state) => localStorage.getItem('isBlocked') === "true" || state.login?.isBlocked // Get isBlocked from Redux
   ); 
 
-
+  console.log("userToken, from protected routes  ", userToken);
   console.log("is user blocked, from protected routes  ", isBlocked);
   
 
@@ -23,7 +22,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   
   const isAdminRoute = location.pathname.startsWith('/admin'); // Check if current route is an admin route
 
-  console.log("in protectedroutes............");
+  console.log("adminToken in protectedroutes............", adminToken);
   
 
   if (isAdminRoute) {

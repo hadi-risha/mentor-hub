@@ -1,5 +1,6 @@
 import { ObjectId } from "mongoose";
 import { IUser } from "../models/userModel";
+import { INotification } from "../models/notificationModel";
 
 
 export interface IAdmin {
@@ -15,6 +16,18 @@ export interface IAdminRepository {
     updateUserBlockStatus(id: string, isBlocked: boolean): Promise<IUser | null>; // Add parameters
 
     switchUserRole(id: string, newRole: string): Promise<IUser | null>;
+
+    createNotification(notificationData: Partial<INotification>): Promise<INotification | null>;
+
+    updateNotification(id: string, notificationData: Partial<INotification>): Promise<INotification | null>;
+    deleteNotification(id: string): Promise<INotification | null>;
+    getNotifications(): Promise<INotification[] | null>;
+    getNotification(id: string): Promise<INotification | null>;
+
+
+
+
+
 
 
 

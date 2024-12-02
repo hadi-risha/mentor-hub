@@ -2,6 +2,7 @@
 import { AdminRepository } from '../repositories/adminRepository';
 import { IAdmin } from '../interfaces/adminInterface';
 import { IUser } from '../models/userModel';
+import { INotification } from '../models/notificationModel';
 
 export class AdminService {
     private adminRepository: AdminRepository;
@@ -28,5 +29,26 @@ export class AdminService {
 
     async switchUserRole(id: string, newRole: string): Promise<IUser> {
         return this.adminRepository.switchUserRole(id, newRole)
+    }
+
+    async createNotification(notificationData: Partial<INotification>): Promise<INotification | null> {
+        return this.adminRepository.createNotification(notificationData)
+    }
+
+
+    async updateNotification(id: string, notificationData: Partial<INotification>): Promise<INotification | null> {
+        return this.adminRepository.updateNotification(id, notificationData)
+    }
+
+    async deleteNotification(id: string): Promise<INotification | null> {
+        return this.adminRepository.deleteNotification(id)
+    }
+
+    async getNotifications(): Promise<INotification[] | null> {
+        return this.adminRepository.getNotifications()
+    }
+
+    async getNotification(id: string): Promise<INotification | null> {
+        return this.adminRepository.getNotification(id)
     }
 }

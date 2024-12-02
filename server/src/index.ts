@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes/authRoutes';
 import studentRoutes from './routes/userRoutes/studentRoutes';
 import instructorRoutes from './routes/userRoutes/instructorRoutes';
-import adminRoutes from './routes/adminRoutes/authRoutes'
+import adminRoutes from './routes/adminRoutes/routes'
 import config from './config/config';
 import morgan from 'morgan';
 import logger from './utils/logger';

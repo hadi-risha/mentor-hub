@@ -31,10 +31,10 @@ return (
       <>
         <AdminHeader />
         <div className="flex h-screen">
-          {/* Sidebar (Admin Navbar) */}
           <div className="w-80">
             <AdminNavbar />
           </div>
+
           {/* Main Content */}
           <div className="flex-1">
             <Routes>
@@ -58,53 +58,19 @@ return (
     )}
 
     {/* Render login page if no token */}
-    {!token && isLoginPage && (
+    {!token && (
       <Routes>
         <Route path="/admin/login" element={<AdminLogin />} />
       </Routes>
     )}
+
+
+    
   </>
 );
 }
 
 export default AdminRoutes;
-
-//   return (
-//     <>
-//       {/* Conditionally render AdminHeader and AdminNavbar based on route */}
-//       {location.pathname !== "/admin/login" && token && <AdminHeader />}
-//       {location.pathname !== "/admin/login" && token && (
-//         <div className="flex h-screen">
-//           <AdminNavbar />
-//         </div>
-//       )}
-      
-//       <Routes>
-//         {/* If token is present, render the protected routes */}
-//         {token ? (
-//           <>
-//             <Route
-//               path="/admin/dashboard"
-//               element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}
-//             />
-//             <Route
-//               path="/admin/user-management"
-//               element={<ProtectedRoute><UserManagement /></ProtectedRoute>}
-//             />
-//             <Route
-//               path="/admin/account-management"
-//               element={<ProtectedRoute><AccountTypeManagement /></ProtectedRoute>}
-//             />
-//             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-//           </>
-//         ) : (
-//           // If no token, show the login page
-//           <Route path="/admin/login" element={<AdminLogin />} />
-//         )}
-//       </Routes>
-//     </>
-//   );
-// }
 
 
 

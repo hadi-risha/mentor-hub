@@ -1,5 +1,6 @@
 import { IAdmin, IAdminRepository } from '../interfaces/adminInterface';
 import { Admin } from '../models/adminModel';
+import { INotification, NotificationModel } from '../models/notificationModel';
 import { IUser, UserModel } from '../models/userModel';
 
 export class AdminRepository implements IAdminRepository {
@@ -52,5 +53,64 @@ export class AdminRepository implements IAdminRepository {
             throw new Error(`Error updating user role: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
+
+
+    async createNotification( notificationData: Partial<INotification> ): Promise<INotification | null> {
+        try {
+            const notification = new NotificationModel({
+                ...notificationData, // Spread notification data
+            });
+            await notification.save();
+
+            return notification;
+        } catch (error) {
+            throw new Error(`Error creating notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+    async updateNotification( id: string, notificationData: Partial<INotification> ): Promise<INotification | null> {
+        try {
+            const notification = await NotificationModel.findByIdAndUpdate(
+                id,
+                notificationData, 
+                { new: true } 
+            );
+            return notification;
+        } catch (error) {
+            throw new Error(`Error updating notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
     
+
+    async deleteNotification( id: string ): Promise<INotification | null> {
+        try {
+            const notification = await NotificationModel.findByIdAndDelete(id);
+            return notification;
+        } catch (error) {
+            throw new Error(`Error deleting notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async getNotifications(): Promise<INotification[] | null> {
+        try {
+            return await NotificationModel.find().sort({ createdAt: -1 })
+        } catch (error) {
+            throw new Error(`Failed to fetch notifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+    async getNotification(id: string): Promise<INotification | null> {
+        try {
+            const notification = await NotificationModel.findById(id);
+            if (!notification) {
+                return null; 
+            }
+            return notification;
+        } catch (error) {
+            throw new Error(`Failed to fetch notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
 }

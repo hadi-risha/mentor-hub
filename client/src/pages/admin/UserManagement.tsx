@@ -140,8 +140,9 @@ const UserManagement = () => {
                             <th className="py-2 px-4 border-b text-black text-left">Name</th>
                             <th className="py-2 px-4 border-b text-black text-left">Email</th>
                             <th className="py-2 px-4 border-b text-black text-left">Role</th>
-                            <th className="py-2 px-4 border-b text-black text-left">Type</th>
+                            {/* <th className="py-2 px-4 border-b text-black text-left">Type</th> */}
                             <th className="py-2 px-4 border-b text-black text-left">Account Status</th>
+                            <th className="py-2 px-4 border-b text-black text-left">Status Update</th>
                         </tr>
                     </thead>
 
@@ -158,24 +159,27 @@ const UserManagement = () => {
                                 </td>
                                 <td className="py-2 px-4 border-b text-gray-800">{user.email}</td>
                                 <td className="py-2 px-4 border-b text-gray-800">{user.role || 'User'}</td>
-                                <td className="py-2 px-4 border-b text-gray-800">
+                                {/* <td className="py-2 px-4 border-b text-gray-800">
                                     {user.role === 'instructor' ? 'Full Access' : 'Limited Access'}
+                                </td> */}
+                                <td className="py-2 px-4 border-b text-gray-800">
+                                    {user.isBlocked === true ? "Blocked" : 'Not Blocked'}
                                 </td>
 
                                 <td className="py-2 px-9 border-b text-gray-800">
                                     {user.isBlocked ?
                                         (
                                             <button 
-                                                // onClick={() => toggleBlockUser(user._id, user.isBlocked)}
                                                 onClick={() => toggleBlockUser(user, 'unblock')}
-                                                className="bg-green-500 text-white px-4 rounded-md py-0.5">
-                                            Block</button>
+                                                className="bg-red-500 text-white px-2 text-sm rounded-md py-1"
+                                            >Unblock
+                                            </button>
                                         ):(
                                             <button 
-                                                // onClick={() => toggleBlockUser(user._id, user.isBlocked)}
-                                                onClick={() => toggleBlockUser(user, 'block')}
-                                                className="bg-red-500 text-white px-2 text-sm rounded-md py-1"
-                                            >Unblock</button>
+                                            onClick={() => toggleBlockUser(user, 'block')}
+                                            className="bg-green-500 text-white px-4 rounded-md py-0.5"
+                                            >Block
+                                            </button>
                                         )
                                     }                                
                                 </td>
@@ -187,31 +191,7 @@ const UserManagement = () => {
             </div>
 
 
-            {/* Modal */}
-            {/* {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-                    <h3 className="text-lg font-semibold text-black capitalize items-center">
-                        {actionType ? 'block' : 'unblock'} user
-                    </h3>
-                    <p className="text-black">Are you sure you want to {actionType ? 'block' : 'unblock'} this user?</p>
-                    <div className="mt-4 flex justify-between">
-                    <button
-                        onClick={handleCancel}
-                        className="bg-gray-300 text-black px-4 py-2 rounded-md"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleConfirmation}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                    >
-                        Confirm
-                    </button>
-                    </div>
-                </div>
-                </div>
-            )} */}
+            
 
 {showModal && (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
