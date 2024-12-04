@@ -286,7 +286,7 @@ const BookedSessions = () => {
                         <p className="text-gray-600 text-sm">{formatDate(session.date)}</p>
                     </div>
                     {/* <p className="text-gray-600 text-sm">meeting link {session?.meetingRoomId}</p> */}
-                    <Link to={`/user/meeting-room/${session?.meetingRoomId}`} className="text-blue-600">
+                    <Link to={`/user/meeting-room/${session?.meetingRoomId}?sessionId=${session._id}`} className="text-blue-600">
                         <div className="mt-5 px-5 py-2 text-xs  bg-blue-600 text-white  hover:text-black flex justify-center items-center">
                             Click here to join the session
                         </div>                    

@@ -4,6 +4,7 @@ import { IUser } from '../interfaces/userInterface';
 import { ISession } from '../models/sessionModel';
 import { IBooking } from '../models/bookingModel'
 import { IRating } from '../models/ratingModel';
+import { INotification } from '../models/notificationModel';
 
 // import {IProfile} from '../models/userProfile'
 
@@ -97,6 +98,10 @@ export class UserService {
         return this.userRepository.findBookingById(id);
     }
 
+    async findBookingByIdS(studentId: string, sessionId: string): Promise<IBooking | null> {
+        return this.userRepository.findBookingByIdS(studentId, sessionId);
+    }
+
     async searchSessions(query: string, studentId: string ): Promise<ISession[] | null> {
         return this.userRepository.searchSessions(query, studentId);
     }
@@ -119,5 +124,15 @@ export class UserService {
     async rateInstructor( ratingData: Partial<IRating> ): Promise<IRating | null> {
         return this.userRepository.rateInstructor(ratingData)
     }
+
+
+    async findBookingAndChangeStatus(id: string, status : string ): Promise<IBooking | null> {
+        return this.userRepository.findBookingAndChangeStatus(id, status)
+    }
+
+    async fetchNotifications(): Promise<INotification[] | null> {
+        return this.userRepository.fetchNotifications()
+    }
+
 
 }

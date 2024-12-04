@@ -42,7 +42,6 @@ const Header = () => {
 
 
   const [profileData, setProfileData] = useState({
-    id: '',
     email: '',
     role: '',
     firstName: '',
@@ -54,16 +53,9 @@ const Header = () => {
     async function fetchProfile() {
       try {
         const res = await axiosInstance.get(`/${userRole}/profile`);
-        const { id, email, role,  firstName, lastName, profilePicUrl } = res.data;
-
-        console.log("id of userrrrrrrrrrrrrrrrrrrrrrrrrrrrrr in headerrrrrrrrrrrrrrrrrr", id);
-        
-        localStorage.setItem('name', `${firstName} ${lastName}`);
-        localStorage.setItem('userId', `${id}`);
-
+        const { email, role,  firstName, lastName, profilePicUrl } = res.data;
 
         setProfileData({
-          id: id || '',
           email: email || '',
           role: role || '',
           firstName: firstName || '',
@@ -416,7 +408,7 @@ const Header = () => {
         </li>
         
         <li className="flex items-center">
-          <a href={`/${userRole}/notification`}>
+          <a href={`/user/notifications`}>
             <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
               <p className='text-black font-serif'>notification</p>
             </div>

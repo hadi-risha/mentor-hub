@@ -1,24 +1,29 @@
-import React from 'react'
-import { useParams } from 'react-router-dom';
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt'
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import config from '../../config';
+import axiosInstance from '../../utils/users/axiosInstance';
 
 const MeetingRoomPage = () => {
-
-    const { meetingRoomId } = useParams();// get the link
+    const { meetingRoomId } = useParams(); // get the link
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const bookingId = queryParams.get('bookingId');
+    const sessionId = queryParams.get('sessionId');
     
+    
+    localStorage.setItem("isCallEnded", "false");
 
     const id = localStorage.getItem("userId");
     const name = localStorage.getItem("name");
     const role = localStorage.getItem("userRole");
 
-    console.log("id, name in rommm",id, name);
-    console.log("role",role);
-    
-    
-
+    console.log("id, name in room", id, name);
+    console.log("role", role);
 
     const myMeeting = async (element: any) => {  // Element where Zego UI will be injected
+       
+
         const appID = Number(config.zegeCloudAppId);
         // const appID = 516395584
         const serverSecret = config.zegeCloudServerSecret;
@@ -32,9 +37,6 @@ const MeetingRoomPage = () => {
             name!, //current user name
         ) 
         const zc = ZegoUIKitPrebuilt.create(kitToken);
-
-
-        
         
         zc.joinRoom({
             container: element,
@@ -49,28 +51,35 @@ const MeetingRoomPage = () => {
                 mode: ZegoUIKitPrebuilt.OneONoneCall
             },
             showScreenSharingButton: true,
-        })
-            
-    }   
-
-  return (
-    // <div>
-    //      <div ref={myMeeting} />
-    //  </div>
+            onLeaveRoom() {
+                localStorage.setItem("isCallEnded", "true");
+            },
+        });
+    }
 
 
-        <div className='w-screen h-auto bg-white'>
-          <div className="ml-28 mr-36 mt-2 mb-36 w-auto h-auto py-2 px-5 shadow-2xl grid grid-cols-3 gap-6">
-              <div className='w-[1240px] h-[600px]' ref={myMeeting} />
-          </div>
+    return (
+        <div className='w-screen h-auto bg-white overflow-x-hidden'>
+            <div className="ml-28 mr-36 mt-2 mb-36 w-auto h-auto py-2 px-5 shadow-2xl ">
+                {
+                    role === 'instructor'? (
+                        <Link to={`/${role}/booked-sessions`}>  {/* instructor */}
+                            <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                                <span className="text-black text-xl">←</span>
+                            </div>
+                        </Link>
+                    ) : (
+                        <Link to={`/${role}/reserved-session/${sessionId}`}>{/* student */}
+                            <div className='border border-gray-400 w-10 h-10 rounded-full cursor-pointer hover:border-blue-700 flex items-center justify-center hover:bg-[#3ee1a6] transition duration-300'>
+                                <span className="text-black text-xl">←</span>
+                            </div>
+                        </Link>
+                    )
+                }
+                <div className='w-[1240px] h-[600px]' ref={myMeeting} />
+            </div>
         </div>
-
-  )
+    );
 }
 
-export default MeetingRoomPage
-
-
-
-
-
+export default MeetingRoomPage;

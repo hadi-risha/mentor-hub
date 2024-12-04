@@ -153,6 +153,23 @@ export class AdminController {
   }
 
 
+  public async updateNotificationStatus(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const {isShown} = req.body;
+      
+      const updatedNotification = await this.adminService.updateNotificationStatus(id, isShown);
+
+
+      return res.status(HttpStatus.OK).json({ message: "Notification updated successfully", updatedNotification,});
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error updating notification:" });
+    }
+  }
+
+
   public async deleteNotification(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;

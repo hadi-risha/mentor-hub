@@ -4,6 +4,7 @@ import { ISession, SessionModel } from '../models/sessionModel';
 import { BookingModel, IBooking } from '../models/bookingModel';
 import mongoose from 'mongoose';
 import { IRating, RatingModel } from '../models/ratingModel';
+import { INotification, NotificationModel } from '../models/notificationModel';
 
 
 
@@ -284,6 +285,18 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+    async findBookingByIdS(studentId: string, sessionId: string): Promise<IBooking | null> {
+        try {
+            return await BookingModel.findOne({ studentId, sessionId });
+        } catch (error) {
+            throw new Error(
+                `Error finding booking by IDs: ${
+                    error instanceof Error ? error.message : "Unknown error"
+                }`
+            );
+        }
+    }
+
 
     async searchSessions(query: string, userId: string): Promise<any[]> {
         try {
@@ -467,7 +480,7 @@ export class UserRepository implements IUserRepository {
     async rateInstructor( ratingData: Partial<IRating> ): Promise<IRating | null> {
         try {
             const response = new RatingModel({
-                ratedBy: ratingData.id,  // Ensure that 'id' is set for ratedBy
+                ratedBy: ratingData.ratedBy,  // Ensure that 'id' is set for ratedBy
                 ratedUser: ratingData.ratedUser,
                 rating: ratingData.rating,
                 feedback: ratingData.feedback,
@@ -478,6 +491,31 @@ export class UserRepository implements IUserRepository {
             return response;
         } catch (error) {
             throw new Error(`Error creating rating: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+
+    async findBookingAndChangeStatus( id: string, status : string ): Promise<IBooking | null> {
+        
+        try {
+            return await BookingModel.findOneAndUpdate(
+                { _id: id },
+                { status: status },
+                { new: true }
+            );
+        } catch (error) {
+            throw new Error(`Error updating session status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+
+    async fetchNotifications(): Promise<INotification[] | null> {
+        try {
+            return await NotificationModel.find({ isShown: true }).sort({ createdAt: -1 });
+        } catch (error) {
+            throw new Error(`Failed to fetch notifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 

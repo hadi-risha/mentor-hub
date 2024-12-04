@@ -36,6 +36,7 @@ import SessionHistory from "../pages/student/SessionHistory";
 import InstructorSessionHistory from "../pages/instructor/SessionHistory";
 import StdMeetingRoom from "../pages/student/MeetingRoom";
 import MeetingRoomPage from "../pages/sharedPages/MeetingRoom";
+import Notifications from "../pages/sharedPages/Notification";
 
 
 interface UserRoutesProps {
@@ -61,18 +62,11 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
       <Header />
         <div className="flex h-screen">
           {/* <SideNavBar /> */}
-            
+
           <Routes>
-
-
-
             {/* Shared Routes for all authenticated users */}
             <Route path="/user/meeting-room/:meetingRoomId" element={<MeetingRoomPage />} /> 
-
-
-
-
-
+            <Route path="/user/notifications" element={<Notifications />} /> 
 
             {/* Routes for Student */}
             {userRole === "student" ? (
@@ -81,7 +75,6 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 <Route path="/student/home" element={<ProtectedRoute><StudentHome /></ProtectedRoute>} /> 
                 <Route path="/student/sessions" element={<ProtectedRoute><StudentAllSessions /></ProtectedRoute>} /> 
 
-                
                 <Route path="/student/instructors" element={<ProtectedRoute><ViewInstructors /></ProtectedRoute>} /> 
 
                 <Route path="/student/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
@@ -100,11 +93,6 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
 
                 {/* <Route path="/student/meeting-room/:meetingRoomId" element={<ProtectedRoute><StdMeetingRoom /></ProtectedRoute>} />    */}
- 
-
-
-
-
 
                 <Route path="*" element={<Navigate to="/student/home" replace />} />
               </>
@@ -113,7 +101,6 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
               // Routes for Instructor
               <>
 
-                {/*   /**************** testing components *****************   */}
                 <Route path="/instructor/home" element={<ProtectedRoute><InstructornewHome /></ProtectedRoute>} /> 
                 <Route path="/instructor/profile" element={<ProtectedRoute><NewProfile /></ProtectedRoute>} />
                 <Route path="/instructor/update-profile" element={<ProtectedRoute><InstructorUpdateProfile /></ProtectedRoute>} />
@@ -122,46 +109,24 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 <Route path="/instructor/update-session/:sessionId" element={<ProtectedRoute><UpdateSession /></ProtectedRoute>} />  
                 <Route path="/instructor/session-actions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />  {/* get instructor all available sessions for delete& update */}
                 <Route path="/instructor/all-sessions" element={<ProtectedRoute><AllSessions /></ProtectedRoute>} />  {/* get instructor all available sessions for delete& update */}
-
-
-
-
-
                 <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
                 <Route path="/instructor/session-history" element={<ProtectedRoute><InstructorSessionHistory /></ProtectedRoute>} /> 
 
+
+
+
+
+
                 {/* <Route path="/instructor/meeting-dashboard" element={<ProtectedRoute><MeetingDashboard /></ProtectedRoute>} />  */}
-
                 {/* <Route path="/instructor/meeting-room/:meetingRoomId" element={<ProtectedRoute><InstructorMeetingRoom /></ProtectedRoute>} />  */}
-
-
-
-                {/*   /**************** /testing components *****************   */}
-
-
-
-
-
-
-
-
-
                 {/* <Route path="/instructor/home" element={<ProtectedRoute><InstructorHome /></ProtectedRoute>} /> */}
                 {/* <Route path="/instructor/profile" element={<ProtectedRoute><InstructorProfile /></ProtectedRoute>} /> */}
                 {/* <Route path="/instructor/update-profile" element={<ProtectedRoute><InstructorUpdateProfile /></ProtectedRoute>} /> */}
                 {/* <Route path="/instructor/create-session" element={<ProtectedRoute><CreateSession /></ProtectedRoute>} />   */}
                 {/* <Route path="/instructor/update-session/:id" element={<ProtectedRoute><UpdateSession /></ProtectedRoute>} />   */}
-
-
-
-
-
-                
                 {/* <Route path="/instructor/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />  get instructor all available sessions */}
                 {/* <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} />  */}
                 
-
-
 
                 <Route path="*" element={<Navigate to="/instructor/home" replace />} />
               </>
@@ -173,8 +138,6 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
               </>
             )}
           </Routes>
-              
-              
         </div>
     </>
   );

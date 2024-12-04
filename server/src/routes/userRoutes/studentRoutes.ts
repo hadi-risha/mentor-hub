@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { updateProfile, sessions, session, getProfile, createBooking, createBookingAndPayment, switchUserRole, bookedSessions, cancelBooking, searchSessions, sessionHistory,pendingSessions, rateInstructor } from '../../controllers/studentController';
+import { updateProfile, sessions, session, getProfile, createBooking, fetchNotifications, createBookingAndPayment, switchUserRole, bookedSessions, cancelBooking, searchSessions, sessionHistory,pendingSessions, rateInstructor, completeSessionAndRateInstructor } from '../../controllers/studentController';
 import { verifyToken } from '../../middleware/verifyUserToken';
 import { checkUserRole } from '../../middleware/checkUserRole';
 import multer from 'multer';
@@ -22,14 +22,7 @@ router.get('/session/:id', verifyToken, checkUserRole('student'), asyncHandler(s
 router.put('/update-profile', verifyToken, checkUserRole('student'), upload.single('profilePic'), asyncHandler(updateProfile));  // profilePic - should matches the field name in  frontend
 router.get('/profile', verifyToken, checkUserRole('student'), asyncHandler(getProfile));  
 
-// router.post('/create-booking', verifyToken, checkUserRole('student'), asyncHandler(createBooking));  
-
-// router.post('/payment', verifyToken, checkUserRole('student'), asyncHandler(stripePayment));  
 router.post('/book-and-pay', verifyToken, checkUserRole('student'), asyncHandler(createBookingAndPayment));  
-
-
-
-
 
 router.post('/switch-role', verifyToken, checkUserRole('student'), asyncHandler(switchUserRole));  
 
@@ -44,6 +37,12 @@ router.get('/session-history', verifyToken, checkUserRole('student'), asyncHandl
 router.get('/pending-sessions', verifyToken, checkUserRole('student'), asyncHandler(pendingSessions)); 
 
 router.post('/rate', verifyToken, checkUserRole('student'), asyncHandler(rateInstructor)); 
+
+router.post('/session-complete/rating', verifyToken, checkUserRole('student'), asyncHandler(completeSessionAndRateInstructor)); 
+
+router.get('/notifications', verifyToken, checkUserRole('student'), asyncHandler(fetchNotifications)); 
+
+
 
 
 

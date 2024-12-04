@@ -35,11 +35,6 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
             return res.status(HttpStatus.UNAUTHORIZED).json({ message: 'access denied, no token provided' });
         }
 
-        // const { id } = req.userData as IUserData;
-
-        // console.log("id from verify user tokennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn", id);
-        
-
         
 
 

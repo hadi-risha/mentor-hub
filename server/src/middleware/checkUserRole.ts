@@ -26,7 +26,6 @@ export const checkUserRole = (uRole: string) =>  {
 
         console.log("user details in checkUserRole", req.userData);
 
-        console.log("id from verify user tokennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn", id);
         const existingProfile = await userService.findUserById(id);
         if (!existingProfile) {
             return res.status(HttpStatus.NOT_FOUND).json({ message: "User doesn't exist" });

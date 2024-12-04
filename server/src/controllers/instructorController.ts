@@ -112,13 +112,12 @@ interface IUserData {
 export const updateProfile = async (req: Request, res: Response): Promise<Response> => {
 
 
-  console.log("instructor update profile page*******************************************************************************************");
 
   const { firstName, lastName, about, country, occupation,currentInstitution,
     teachingViews,achievements,
     education,experience, imageStatus} = req.body;
 
-  console.log("imageStatus.....................>>   ", imageStatus);
+  console.log("imageStatus..>>   ", imageStatus);
 
   try {
     let token = req.header("Authorization"); 
@@ -126,11 +125,6 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
 
     const {id, role} = req.userData as IUserData;
     console.log("id, role", id, role);
-
-
-    
-    
-
 
     const profilePicFile = req.file;
     console.log("profilePicFile", profilePicFile);
@@ -153,8 +147,8 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
       return res.status(HttpStatus.NOT_FOUND).json({ message: "User doesn't exist" });
     }
 
-    console.log("image from frontend -------------- key : ", profilePicFile);
-    console.log("already exist image............from backend db        " , existingProfile?.image);
+    console.log("image from frontend - key : ", profilePicFile);
+    console.log("already exist image..from backend db        " , existingProfile?.image);
 
 
 
@@ -174,7 +168,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
         url: profilePicUrl,
         key: profilePicKey,
       };
-      console.log("student profile uploaded in s3-----------------------==", profilePicUrl);
+      console.log("student profile uploaded in s3-", profilePicUrl);
       console.log("profilePicFile && updateProfilePic", profilePicFile , updateProfilePic);
     } else if (deleteProfilePic) {
       console.log("profile pic deleted");
@@ -188,17 +182,11 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
           url: existingProfile.image?.url,
           key: existingProfile.image?.key,
         };
-        // No action needed; existing image values remain
         console.log("No action needed, existing image values remain");
     }else{
       console.log("something went wrong in image upload", profilePicUrl);
       console.log("profilePicFile && updateProfilePic", profilePicFile , updateProfilePic);
     }
-
-      
-
-      
-      
 
       existingProfile.firstName = firstName ?? existingProfile.firstName;
       existingProfile.lastName = lastName ?? existingProfile.lastName;
@@ -211,9 +199,6 @@ export const updateProfile = async (req: Request, res: Response): Promise<Respon
       if (education !== undefined) existingProfile.education = education;
       if (experience !== undefined) existingProfile.experience = experience;
       
-
-      //  await userService.updateUserNames(id, { firstName, lastName });
-
       const updatedProfile = await userService.updateUserDetails(existingProfile);
       return res.status(HttpStatus.OK).json({ message: "Profile successfully updated", profile: updatedProfile });
 
@@ -248,12 +233,9 @@ export const getSession = async (req: Request, res: Response): Promise<Response>
           return res.status(HttpStatus.NOT_FOUND).json({ message: "Session not found" });
       }
       console.log("session info:- ", session);
-      // console.log("session info instructorId:- ", session.instructorId?.firstName, session.instructorId?.lastName, session.instructorId?.image.url);
-
-
-      // _id firstName lastName image.url
+      
       console.log(
-        "session info instructorId:- *******************************************",
+        "session info instructorId:- ",
         (session.instructorId as IInstructor)?.firstName,
         (session.instructorId as IInstructor)?.lastName,
         (session.instructorId as IInstructor)?.image.url,
@@ -381,7 +363,7 @@ export const updateSession = async (req: Request, res: Response): Promise<Respon
 
   const timeSlots = rawTimeSlots.split(',');
   console.log("session time slots:- ", timeSlots);
-  console.log("imageStatus.....................>>   ", imageStatus);
+  console.log("imageStatus..>>   ", imageStatus);
   
   const coverImageFile = req.file;
   console.log("cover image", coverImageFile);
@@ -519,8 +501,6 @@ export const deleteSession = async (req: Request, res: Response): Promise<Respon
 export const switchUserRole = async (req: Request, res: Response): Promise<Response> => {
   // const { userId } = req.body;
 
-  console.log("in update roleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
-
   let token = req.header("Authorization"); 
   console.log("token in instructor role switch", token);
 
@@ -532,7 +512,7 @@ export const switchUserRole = async (req: Request, res: Response): Promise<Respo
 
   try {
     const updatedUser = await userService.switchUserRole(id, newRole)
-    console.log("updatedUser-----------", updatedUser);
+    console.log("updatedUser-", updatedUser);
     
     return res.status(HttpStatus.CREATED).json({ message: "User role updated successfully", ...updatedUser });
   } catch (error) {
@@ -544,9 +524,7 @@ export const switchUserRole = async (req: Request, res: Response): Promise<Respo
 
 
 export const bookedSessions = async (req: Request, res: Response): Promise<Response> => {
-  // const { userId } = req.body;
-
-
+  
   let token = req.header("Authorization"); 
   console.log("token in student payment", token);
 
@@ -556,7 +534,6 @@ export const bookedSessions = async (req: Request, res: Response): Promise<Respo
 
 
   try {
-    // const updatedUser = await userService.switchUserRole(id, newRole)
     const bookedSessions = await userService.instructorBookedSessions(id)
     console.log("Booked sessions-----------", bookedSessions);
     
@@ -570,19 +547,13 @@ export const bookedSessions = async (req: Request, res: Response): Promise<Respo
 
 
 export const availableSessions = async (req: Request, res: Response): Promise<Response> => {
-  // const { userId } = req.body;
-
-
+  
   let token = req.header("Authorization"); 
   console.log("token in student payment", token);
 
   const {id, role} = req.userData as IUserData;
   console.log("id, role", id, role);
-
-
-
   try {
-    // const updatedUser = await userService.switchUserRole(id, newRole)
     const availableSessions = await userService.instructorAvailableSessions(id)
     console.log("Booked sessions-----------", availableSessions);
     
@@ -614,7 +585,7 @@ export const sessionHistory = async (req: Request, res: Response): Promise<Respo
 
 
 export const searchSessions = async (req: Request, res: Response): Promise<Response> => {
-  const { query } = req.query as { query?: string }; // Accept `query` from request
+  const { query } = req.query as { query?: string }; 
   const { id } = req.userData as IUserData;
 
   if (!query) {
@@ -628,5 +599,18 @@ export const searchSessions = async (req: Request, res: Response): Promise<Respo
   } catch (error) {
     console.error("Error performing search:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error performing search" });
+  }
+}
+
+
+export const fetchNotifications = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+    const notifications = await userService.fetchNotifications();
+    return res.status(HttpStatus.OK).json({ message: "Notifications fetched successfully", notifications,});
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching notifications:" });
   }
 }

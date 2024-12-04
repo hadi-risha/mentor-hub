@@ -20,6 +20,8 @@ export interface IAdminRepository {
     createNotification(notificationData: Partial<INotification>): Promise<INotification | null>;
 
     updateNotification(id: string, notificationData: Partial<INotification>): Promise<INotification | null>;
+    updateNotificationStatus(id: string,isShown: boolean ): Promise<INotification | null>;
+
     deleteNotification(id: string): Promise<INotification | null>;
     getNotifications(): Promise<INotification[] | null>;
     getNotification(id: string): Promise<INotification | null>;

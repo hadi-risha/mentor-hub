@@ -36,6 +36,10 @@ const AdminNavbar = () => {
         activateItem = 'accountTypeManagement';
     } else if (location.pathname.includes('notification-management')) {
         activateItem = 'notificationManagement';
+    } else if (location.pathname.includes('create-notification')) {
+        activateItem = 'notificationManagement';
+    } else if (location.pathname.includes('update-notification')) {
+        activateItem = 'notificationManagement';
     }
    
 

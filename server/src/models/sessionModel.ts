@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
 
-
 export interface IInstructor {
     _id: string;
     firstName: string;

@@ -8,6 +8,8 @@ import { IBooking } from '../models/bookingModel';
 import mongoose from "mongoose"; 
 import Stripe from 'stripe';
 import { v4 as uuidv4 } from 'uuid';
+import { ObjectId } from 'mongodb';
+
 
 
 
@@ -243,8 +245,6 @@ export const createBookingAndPayment = async (req: Request, res: Response): Prom
       mode: 'payment',
       success_url: `${config.frontendUrl}/student/payment-success`,
       cancel_url: `${config.frontendUrl}/student/payment-cancel`,
-      // success_url: `/student/payment-success`,
-      // cancel_url: `/student/payment-cancel`,
     });
 
     console.log("00000000    paymentSession---------------0000000", paymentSession.url);
@@ -322,16 +322,12 @@ export const cancelBooking = async (req: Request, res: Response): Promise<Respon
 
     console.log("booking...", booking);
     
-
-    // Cancel the booking and update the status
     booking.status = "cancelled";
     await booking.save();
 
     const checkoutSession = await stripe.checkout.sessions.retrieve( booking.stripePaymentCheckoutSessionId );
     console.log("checkoutSession", checkoutSession);
     
-
-    // Refund the payment if there was a successful payment
     if ( checkoutSession ) {
       try {
 
@@ -356,7 +352,7 @@ export const cancelBooking = async (req: Request, res: Response): Promise<Respon
 
 
 export const searchSessions = async (req: Request, res: Response): Promise<Response> => {
-  const { query } = req.query as { query?: string }; // Accept `query` from request
+  const { query } = req.query as { query?: string }; 
   const { id } = req.userData as IUserData;
 
   if (!query) {
@@ -433,5 +429,72 @@ export const rateInstructor = async (req: Request, res: Response): Promise<Respo
   } catch (error) {
     console.error("Error submitting rate:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error submitting rate:" });
+  }
+}
+
+
+
+
+
+export const completeSessionAndRateInstructor = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+
+
+    // const { bookingId } = req.body;
+
+    const { sessionId, bookingId, rating, feedback } = req.body;
+    console.log("bookingId......hh.........", bookingId);
+    
+    log
+    // Validate rating options
+    if (!["poor", "good", "excellent"].includes(rating)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Invalid rating value." });
+    }
+
+    const booking = await userService.findBookingByIdS(id, sessionId);
+    if (!booking) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Booking not found" });
+    }
+    
+    const statusUpdated = await userService.findBookingAndChangeStatus(String(booking?._id), 'completed');
+    if (!statusUpdated) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Error updating session status" });
+    }
+
+    // If the student has provided a rating, submit the rating data
+    if (rating) {
+      const ratingData = {
+        ratedBy: new ObjectId(id), 
+        ratedUser: booking?.instructorId, 
+        rating,
+        feedback,
+        sessionId: booking.sessionId
+      };
+      const newRating = await userService.rateInstructor(ratingData);
+
+      console.log("New Rating Submitted:", newRating);
+
+      return res.status(HttpStatus.CREATED).json({ message: "Rating submitted successfully", rating: newRating });
+    }
+
+
+    return res.status(HttpStatus.OK).json({ message: "Session marked as completed. No rating provided." });
+  } catch (error) {
+    console.error("Error submitting rate:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error submitting rate:" });
+  }
+}
+
+export const fetchNotifications = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+    const notifications = await userService.fetchNotifications();
+    return res.status(HttpStatus.OK).json({ message: "Notifications fetched successfully", notifications,});
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching notifications:" });
   }
 }

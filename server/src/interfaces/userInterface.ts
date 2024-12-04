@@ -2,6 +2,7 @@ import { Document } from 'mongoose';
 import { ISession } from '../models/sessionModel';
 import { IBooking } from '../models/bookingModel'
 import { IRating } from '../models/ratingModel';
+import { INotification } from '../models/notificationModel';
 
 
 
@@ -64,6 +65,9 @@ export interface IUserRepository {
   updateIsRoleChanged(id: string ): Promise<IUser | null>;
 
   findBookingById(id: string): Promise<IBooking | null>;
+  findBookingByIdS(studentId: string, sessionId: string): Promise<IBooking | null>
+
+
 
   searchSessions( query: string, userId: string ): Promise<ISession[] | null>;
   instructorSearchSessions( query: string, instructorId: string ): Promise<ISession[] | null>;
@@ -73,6 +77,13 @@ export interface IUserRepository {
   pendingSessions( id: string ): Promise<IBooking[] | null>;
 
   rateInstructor( ratingData: Partial<IRating>  ): Promise<IRating | null>;
+
+  findBookingAndChangeStatus( id: string, status : string ): Promise<IBooking | null>;
+
+  
+  fetchNotifications(): Promise<INotification[] | null>;
+
+
 
 
 

@@ -21,10 +21,12 @@ router.patch('/user/block/:id', adminAuthMiddleware, asyncHandler(adminControlle
 router.post('/switch-role', adminAuthMiddleware, asyncHandler(adminController.switchUserRole.bind(adminController)) );
 
 
-router.post('/notification/create', adminAuthMiddleware, asyncHandler(adminController.createNotification.bind(adminController)) );
-router.put('/notification/update/:id', adminAuthMiddleware, asyncHandler(adminController.updateNotification.bind(adminController)) );
+router.post('/create-notification', adminAuthMiddleware, asyncHandler(adminController.createNotification.bind(adminController)) );
+router.put('/update-notification/:id', adminAuthMiddleware, asyncHandler(adminController.updateNotification.bind(adminController)) );
 
 router.delete('/notification/delete/:id', adminAuthMiddleware, asyncHandler(adminController.deleteNotification.bind(adminController)) );
+router.put('/notification/update-status/:id', adminAuthMiddleware, asyncHandler(adminController.updateNotificationStatus.bind(adminController)) );
+
 router.get('/notifications', adminAuthMiddleware, asyncHandler(adminController.getNotifications.bind(adminController)) ); //all notifications
 
 router.get('/notification/:id', adminAuthMiddleware, asyncHandler(adminController.getNotification.bind(adminController)) ); //single notification

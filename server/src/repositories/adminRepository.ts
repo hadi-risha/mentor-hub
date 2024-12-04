@@ -81,6 +81,21 @@ export class AdminRepository implements IAdminRepository {
             throw new Error(`Error updating notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
+
+    async updateNotificationStatus(id: string, isShown: boolean): Promise<INotification | null> {
+        try {
+          // Fetch and update the notification
+          const notification = await NotificationModel.findByIdAndUpdate(
+            id,
+            { isShown: isShown },  // Correct object syntax for updating
+            { new: true } // Ensures the updated document is returned
+          );
+      
+          return notification;
+        } catch (error) {
+          throw new Error(`Error updating notification status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
     
 
     async deleteNotification( id: string ): Promise<INotification | null> {

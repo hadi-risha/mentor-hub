@@ -75,7 +75,7 @@ connectDB();
 
 app.get('/', (req, res) => {
   console.log('Received request at /');
-  res.status(HttpStatus.OK).json({ message: "hello from home", text: "hlo prr" });
+  res.status(HttpStatus.OK).json({ message: "hello from home", text: "hlo world" });
 });
 
 app.use(errorHandler);

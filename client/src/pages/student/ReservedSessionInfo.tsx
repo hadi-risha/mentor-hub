@@ -26,11 +26,14 @@ interface ISession {
 }
 
 const ReservedSessionInfo = () => {
+    const isCallEnded = localStorage.getItem("isCallEnded");
+
     const navigate = useNavigate();
     const { id } = useParams();
 
     const { state } = useLocation(); // access state from navigation
     const { bookingId, date, time, meetingRoomId } = state || {}; 
+
     
 
     const [session, setSession] = useState<ISession>();
@@ -38,6 +41,10 @@ const ReservedSessionInfo = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [sessionCancelled, setSessionCancelled] = useState(false);
+
+
+    const [isRatingModalOpen, setRatingModalOpen] = useState(false); // To manage modal visibility
+    const [rating, setRating] = useState('');
 
     useEffect(() => {
         async function fetchSession() {
@@ -96,6 +103,58 @@ const ReservedSessionInfo = () => {
           alert('An error occurred while canceling the booking.');
         }
     };
+
+
+    const handleRating = (ratingValue: string) => {
+
+        console.log("ratingValue--------------------------", ratingValue);
+        
+        setRating(ratingValue); // Set the selected rating
+        // setRatingModalOpen(false); // Close the modal after selection
+        console.log(`Instructor rated as: ${ratingValue}`);
+    };
+
+
+    
+
+    const handleStatusAndRating = async () => {
+        console.log("submittttttttttttttttttt", rating);
+
+        if (!rating) {
+            console.error('No rating selected');
+            alert('No rating selected')
+            return;
+        }
+        // setRatingModalOpen(false)
+
+        console.log("submittttttttttttttttttt", rating);
+        
+        try {
+            const data = {
+                bookingId: bookingId,
+                sessionId: id,
+                rating: rating, // You can modify this as needed
+                feedback: '', // You can modify this as needed
+            };
+
+            console.log("Data sent to API:", data);
+
+
+            // Send data to update session completion
+            const updatedStatusandRating = await axiosInstance.post('/student/session-complete/rating', data);
+            console.log("updatedStatusandRating", updatedStatusandRating);
+            
+
+            if (updatedStatusandRating.status === 200 || updatedStatusandRating.status === 201) {
+                // Handle success if needed
+                console.log("Session status and rating updated successfully");
+            } else {
+                console.error('Error updating session completion and rating');
+            }
+        } catch (error) {
+            console.error('Error updating session status or rating:', error);
+        }
+    };
   
 
     return (
@@ -113,16 +172,31 @@ const ReservedSessionInfo = () => {
                         <div className='ml-14 w-5/12'>
                             <h1 className='text-xl text-white font-bold font-serif'>{session?.title}</h1>
                             <p className='mt-6 '>{session?.introduction}</p>
-                            <div className='flex space-x-3 mt-5'>
-                                <p className='text-sm font-serif'>Instrucror overall rating:</p>
-                                <div className='flex space-x-1 '>
-                                    <EmojioneStar />
-                                    <EmojioneStar />
-                                    <EmojioneStar />
-                                    <EmojioneStar />
-                                    <EmojioneMonotoneStar />
-                                </div>
-                            </div>
+                            {
+                                localStorage.getItem("isCallEnded") === 'false'  && (
+                                 <div className='flex space-x-3 mt-5'>
+                                        <p className='text-sm font-serif'>Instrucror overall rating:</p>
+                                        <div className='flex space-x-1 '>
+                                            <EmojioneStar />
+                                            <EmojioneStar />
+                                            <EmojioneStar />
+                                            <EmojioneStar />
+                                            <EmojioneMonotoneStar />
+                                        </div>
+                                    </div> 
+                                )
+                            }
+                            
+                            {
+                                localStorage.getItem("isCallEnded") === 'true' && (
+                                    <button 
+                                    onClick={() => setRatingModalOpen(true)} // Open modal on button click
+                                    className="mt-3 w-auto px-4 h-9 bg-white text-black font-semibold flex items-center justify-center shadow-md border border-black">
+                                    <EmojioneStar /> <EmojioneStar /> Rate Instructor <EmojioneStar /> <EmojioneStar />
+                                    </button>
+                                )
+                            }
+                            
                         </div>
 
                         {/* SESSION CARD */}
@@ -165,7 +239,8 @@ const ReservedSessionInfo = () => {
                                     </p>
                                 </div>
                                 <div className='flex justify-center mt-7'>
-                                    { sessionCancelled ? (
+                                    {/* Case 1: If session is cancelled */}
+                                    {sessionCancelled ? (
                                         <Link to={"/student/upcoming-sessions"}>
                                             <button 
                                                 className="w-40 h-9 bg-[#3ee1a6] text-white font-semibold flex items-center justify-center rounded-full shadow-md border border-black relative overflow-hidden group transition duration-700">
@@ -174,20 +249,23 @@ const ReservedSessionInfo = () => {
                                             </button>
                                         </Link>
                                     ) : (
-                                        <button 
-                                            onClick={() => {
-                                                // handleCancelSession(); 
-                                                setIsModalOpen(true)
-                                            }}
-                                            className="w-40 h-9 bg-[#3ee1a6] text-white font-semibold flex items-center justify-center rounded-full shadow-md border border-black relative overflow-hidden group transition duration-700">
-                                            <span className="text-black relative z-10 text-xs">Cancel Session</span>
-                                            <span className="absolute inset-0 bg-[#ff5c4c] transition-all duration-600 group-hover:w-full group-hover:left-0 w-0 left-[-100%] h-full"></span>
-                                        </button>
+                                        // Case 2: If the call has ended (check localStorage)
+                                        localStorage.getItem("isCallEnded") === 'true' ? (
+                                            // Do nothing, so no button is rendered when the call has ended
+                                            null
+                                        ) : (
+                                            // Case 3: Default case when the button to cancel session is shown
+                                            <button 
+                                                onClick={() => {
+                                                    // handleCancelSession(); 
+                                                    setIsModalOpen(true);
+                                                }}
+                                                className="w-40 h-9 bg-[#3ee1a6] text-white font-semibold flex items-center justify-center rounded-full shadow-md border border-black relative overflow-hidden group transition duration-700">
+                                                <span className="text-black relative z-10 text-xs">Cancel Session</span>
+                                                <span className="absolute inset-0 bg-[#ff5c4c] transition-all duration-600 group-hover:w-full group-hover:left-0 w-0 left-[-100%] h-full"></span>
+                                            </button>
+                                        )
                                     )}
-                                    
-
-
-                                    
                                 </div>
                             </div>
                         </div>
@@ -205,7 +283,12 @@ const ReservedSessionInfo = () => {
                             <p className='w-8/12 text-gray-600 text-sm ml-8 pr-3 mt-2'>{session?.description}
                             </p>
 
-                            <Link to={`/user/meeting-room/${meetingRoomId}`} className="text-blue-600">
+                            <Link 
+                            className="text-blue-600"
+                            // to={`/user/meeting-room/${meetingRoomId}`} 
+                            to={`/user/meeting-room/${meetingRoomId}?bookingId=${bookingId}&sessionId=${id}`} 
+                            //bookiid as query param
+                            >
                                 <div className='mt-10 px-5 py-3 text-sm bg-blue-600 text-white w-6/12 hover:text-black'>Click here to join the session</div>
                             </Link>
                         </div>
@@ -225,6 +308,40 @@ const ReservedSessionInfo = () => {
                         >
                             <p>Are you sure you want to cancel this session?</p>
                         </Modal>
+                    )}
+
+
+                    {isRatingModalOpen && (
+                        <div className="fixed inset-0 flex justify-center items-center bg-gray-500 bg-opacity-50 z-50">
+                            <div className="bg-white p-5 rounded-lg shadow-lg">
+                                <h2 className="text-xl mb-4 text-black font-bold">Rate the Instructor</h2>
+                                <div className="flex space-x-4">
+                                <button
+                                    onClick={() => handleRating('poor')}
+                                    className="w-20 h-9 bg-[#ff5c4c] text-white rounded-full">
+                                    Poor
+                                </button>
+                                <button
+                                    onClick={() => handleRating('good')}
+                                    className="w-20 h-9 bg-[#ffdb4c] text-white rounded-full">
+                                    Good
+                                </button>
+                                <button
+                                    onClick={() => handleRating('excellent')}
+                                    className="w-20 h-9 bg-[#3ee1a6] text-white rounded-full">
+                                    Excellent
+                                </button>
+                                </div>
+                                <button
+                                onClick={() => setRatingModalOpen(false)} // Close modal
+                                className="ml-3 mt-4 w-5/12 py-2 text-black border border-black  text-center ">
+                                Close
+                                </button>
+
+                                <button onClick={handleStatusAndRating} className="ml-4 text-black submit-rating mt-4 w-5/12  py-2 border border-black  text-center">Submit</button>
+
+                            </div>
+                        </div>
                     )}
 
                 </div>

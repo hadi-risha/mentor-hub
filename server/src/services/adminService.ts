@@ -40,6 +40,10 @@ export class AdminService {
         return this.adminRepository.updateNotification(id, notificationData)
     }
 
+    async updateNotificationStatus(id: string, isShown: boolean): Promise<INotification | null> {
+        return this.adminRepository.updateNotificationStatus(id, isShown)
+    }
+
     async deleteNotification(id: string): Promise<INotification | null> {
         return this.adminRepository.deleteNotification(id)
     }
