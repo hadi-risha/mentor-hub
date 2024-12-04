@@ -16,7 +16,7 @@ import { IconParkSolidDownOne, CharmMenuKebab, EmojioneStar, EmojioneMonotoneSta
 import { BxCalendar, FluentPeopleTeam48Regular, IcOutlineAccessTime, PhChalkboardTeacher } from '../../assets/usersIcons/SessionIcons'
 import { useEffect, useState } from 'react'
 import axiosInstance from '../../utils/users/axiosInstance'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaUserCircle } from 'react-icons/fa'
 
 
@@ -44,6 +44,7 @@ interface IBooking {
     date: string;
     timeSlot: string;
     status: string;
+    meetingRoomId: string;
 
 }
 
@@ -284,13 +285,19 @@ const BookedSessions = () => {
                         <BxCalendar />
                         <p className="text-gray-600 text-sm">{formatDate(session.date)}</p>
                     </div>
+                    {/* <p className="text-gray-600 text-sm">meeting link {session?.meetingRoomId}</p> */}
+                    <Link to={`/user/meeting-room/${session?.meetingRoomId}`} className="text-blue-600">
+                        <div className="mt-5 px-5 py-2 text-xs  bg-blue-600 text-white  hover:text-black flex justify-center items-center">
+                            Click here to join the session
+                        </div>                    
+                    </Link>
 
                     {/* View Details Button */}
-                    <button 
+                    {/* <button 
                         onClick={() => handleViewDetails(session.sessionId._id)} // Call the navigate function
                         className="mt-5 bg-blue-800 text-sm px-4 py-1 rounded-2xl items-center ml-10">
                     View Details
-                    </button>
+                    </button> */}
                 </div>
                 ))
             ) : (

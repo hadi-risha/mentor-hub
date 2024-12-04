@@ -1,6 +1,7 @@
 import { Document } from 'mongoose';
 import { ISession } from '../models/sessionModel';
 import { IBooking } from '../models/bookingModel'
+import { IRating } from '../models/ratingModel';
 
 
 
@@ -70,6 +71,9 @@ export interface IUserRepository {
   sessionHistory( id: string ): Promise<IBooking[] | null>;
   instructorSessionHistory( id: string ): Promise<IBooking[] | null>;
   pendingSessions( id: string ): Promise<IBooking[] | null>;
+
+  rateInstructor( ratingData: Partial<IRating>  ): Promise<IRating | null>;
+
 
 
 

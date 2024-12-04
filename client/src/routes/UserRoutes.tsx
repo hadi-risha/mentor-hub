@@ -34,6 +34,8 @@ import NewProfile from "../pages/instructor/NewProfile";
 import NewCreateSession from "../pages/instructor/NewCreateSession";
 import SessionHistory from "../pages/student/SessionHistory";
 import InstructorSessionHistory from "../pages/instructor/SessionHistory";
+import StdMeetingRoom from "../pages/student/MeetingRoom";
+import MeetingRoomPage from "../pages/sharedPages/MeetingRoom";
 
 
 interface UserRoutesProps {
@@ -61,6 +63,17 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
           {/* <SideNavBar /> */}
             
           <Routes>
+
+
+
+            {/* Shared Routes for all authenticated users */}
+            <Route path="/user/meeting-room/:meetingRoomId" element={<MeetingRoomPage />} /> 
+
+
+
+
+
+
             {/* Routes for Student */}
             {userRole === "student" ? (
               <>
@@ -83,7 +96,13 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
                 <Route path="/student/upcoming-sessions" element={<ProtectedRoute><UpcomingSessions /></ProtectedRoute>} />   
                 <Route path="/student/reserved-session/:id" element={<ProtectedRoute><ReservedSessionInfo /></ProtectedRoute>} /> 
-                <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />   
+                <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />  
+
+
+                {/* <Route path="/student/meeting-room/:meetingRoomId" element={<ProtectedRoute><StdMeetingRoom /></ProtectedRoute>} />    */}
+ 
+
+
 
 
 
@@ -111,12 +130,9 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
                 <Route path="/instructor/session-history" element={<ProtectedRoute><InstructorSessionHistory /></ProtectedRoute>} /> 
 
+                {/* <Route path="/instructor/meeting-dashboard" element={<ProtectedRoute><MeetingDashboard /></ProtectedRoute>} />  */}
 
-
-
-
-
-
+                {/* <Route path="/instructor/meeting-room/:meetingRoomId" element={<ProtectedRoute><InstructorMeetingRoom /></ProtectedRoute>} />  */}
 
 
 

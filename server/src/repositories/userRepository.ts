@@ -3,6 +3,8 @@ import { UserModel } from '../models/userModel';
 import { ISession, SessionModel } from '../models/sessionModel';
 import { BookingModel, IBooking } from '../models/bookingModel';
 import mongoose from 'mongoose';
+import { IRating, RatingModel } from '../models/ratingModel';
+
 
 
 
@@ -459,6 +461,27 @@ export class UserRepository implements IUserRepository {
             throw new Error(`Failed to fetch bookings: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
+
+
+
+    async rateInstructor( ratingData: Partial<IRating> ): Promise<IRating | null> {
+        try {
+            const response = new RatingModel({
+                ratedBy: ratingData.id,  // Ensure that 'id' is set for ratedBy
+                ratedUser: ratingData.ratedUser,
+                rating: ratingData.rating,
+                feedback: ratingData.feedback,
+                sessionId: ratingData.sessionId
+            });
+
+            await response.save();
+            return response;
+        } catch (error) {
+            throw new Error(`Error creating rating: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    
     
     
 }

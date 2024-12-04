@@ -14,6 +14,7 @@
     "@types/node": "^16.18.112",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
+    "@zegocloud/zego-uikit-prebuilt": "^2.13.1",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
     "flowbite-react": "^0.10.2",

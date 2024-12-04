@@ -30,7 +30,8 @@ const ReservedSessionInfo = () => {
     const { id } = useParams();
 
     const { state } = useLocation(); // access state from navigation
-    const { bookingId, date, time } = state || {}; 
+    const { bookingId, date, time, meetingRoomId } = state || {}; 
+    
 
     const [session, setSession] = useState<ISession>();
     const [loading, setLoading] = useState(true);
@@ -203,6 +204,10 @@ const ReservedSessionInfo = () => {
                             </div>
                             <p className='w-8/12 text-gray-600 text-sm ml-8 pr-3 mt-2'>{session?.description}
                             </p>
+
+                            <Link to={`/user/meeting-room/${meetingRoomId}`} className="text-blue-600">
+                                <div className='mt-10 px-5 py-3 text-sm bg-blue-600 text-white w-6/12 hover:text-black'>Click here to join the session</div>
+                            </Link>
                         </div>
                     </div>
 

@@ -7,6 +7,8 @@ import { log } from 'winston';
 import { IBooking } from '../models/bookingModel';
 import mongoose from "mongoose"; 
 import Stripe from 'stripe';
+import { v4 as uuidv4 } from 'uuid';
+
 
 
 const userService = new UserService();
@@ -128,6 +130,7 @@ export const getProfile = async (req: Request, res: Response): Promise<Response>
     }
 
     const userData = {
+      id:user._id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
@@ -247,6 +250,8 @@ export const createBookingAndPayment = async (req: Request, res: Response): Prom
     console.log("00000000    paymentSession---------------0000000", paymentSession.url);
     console.log("00000000    paymentSession.id---------------0000000", paymentSession.id);
 
+    const meetingRoomId = uuidv4();
+    
     const booking = await userService.createBooking({
       studentId: new mongoose.Types.ObjectId(id),
       sessionId,
@@ -256,6 +261,7 @@ export const createBookingAndPayment = async (req: Request, res: Response): Prom
       concerns,
       status: "booked",
       stripePaymentCheckoutSessionId: paymentSession.id, // Save Stripe session ID
+      meetingRoomId,
     } as Partial<IBooking>);
 
     console.log("booking", booking);
@@ -402,5 +408,30 @@ export const pendingSessions = async (req: Request, res: Response): Promise<Resp
   } catch (error) {
     console.error("Error fetching booked sessions:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching pending sessions:" });
+  }
+}
+
+
+export const rateInstructor = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+
+    const { ratedUser, rating, feedback, sessionId } = req.body;
+
+    // Validate rating options
+    if (!["poor", "good", "excellent"].includes(rating)) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Invalid rating value." });
+    }
+
+    const ratingData = { id, ratedUser, rating, feedback, sessionId }
+
+    const newRating = await userService.rateInstructor(ratingData)
+    console.log("newRating : ", newRating);
+    
+    return res.status(HttpStatus.CREATED).json({ message: "Rating submitted successfully", rating: newRating });
+  } catch (error) {
+    console.error("Error submitting rate:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error submitting rate:" });
   }
 }

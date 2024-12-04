@@ -77,6 +77,7 @@ export const getProfile = async (req: Request, res: Response): Promise<Response>
       }
 
       const userData = {
+        id:user._id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,

@@ -42,6 +42,7 @@ const Header = () => {
 
 
   const [profileData, setProfileData] = useState({
+    id: '',
     email: '',
     role: '',
     firstName: '',
@@ -53,9 +54,16 @@ const Header = () => {
     async function fetchProfile() {
       try {
         const res = await axiosInstance.get(`/${userRole}/profile`);
-        const { email, role,  firstName, lastName, profilePicUrl } = res.data;
+        const { id, email, role,  firstName, lastName, profilePicUrl } = res.data;
+
+        console.log("id of userrrrrrrrrrrrrrrrrrrrrrrrrrrrrr in headerrrrrrrrrrrrrrrrrr", id);
+        
+        localStorage.setItem('name', `${firstName} ${lastName}`);
+        localStorage.setItem('userId', `${id}`);
+
 
         setProfileData({
+          id: id || '',
           email: email || '',
           role: role || '',
           firstName: firstName || '',

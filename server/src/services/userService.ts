@@ -3,6 +3,7 @@ import { UserRepository } from '../repositories/userRepository';
 import { IUser } from '../interfaces/userInterface';
 import { ISession } from '../models/sessionModel';
 import { IBooking } from '../models/bookingModel'
+import { IRating } from '../models/ratingModel';
 
 // import {IProfile} from '../models/userProfile'
 
@@ -113,6 +114,10 @@ export class UserService {
 
     async pendingSessions(studentId: string): Promise<IBooking[] | null> {
         return this.userRepository.pendingSessions(studentId);
+    }
+
+    async rateInstructor( ratingData: Partial<IRating> ): Promise<IRating | null> {
+        return this.userRepository.rateInstructor(ratingData)
     }
 
 }
