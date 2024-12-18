@@ -9,6 +9,9 @@ import ProtectedRoute from '../protectedRoute/ProtectedRoute';
 import NotificationManagement from "../pages/admin/NotificationManagement";
 import CreateNotification from "../pages/admin/CreateNotification";
 import UpdateNotification from "../pages/admin/UpdateNotification";
+import NewAdminSignup from "../pages/admin/NewAdminSignup";
+import NewAdminLogin from "../pages/admin/NewAdminLogin";
+import SuperAdminLogin from "../pages/superAdmin/Login";
 
 interface AdminRoutesProps {
   token: string | null;
@@ -54,7 +57,14 @@ function AdminRoutes({ token }: AdminRoutesProps) {
       {/* Render login page if no token */}
       {!token && (
         <Routes>
-          <Route path="/admin/login" element={<AdminLogin />} />
+          {/* <Route path="/admin/login" element={<AdminLogin />} /> */}   {/* old admin login  */}
+
+          
+          {/* <Route path="/admin/login" element={<NewAdminSignup />} />   */}   {/* new admin signup  */}
+          {/* <Route path="/admin/login" element={<NewAdminLogin />} />    */}  {/* new admin login  */}
+          
+
+          <Route path="/admin/login" element={<SuperAdminLogin />} />  {/* super admin login  */}
         </Routes>
       )}
     </>

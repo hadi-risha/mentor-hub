@@ -2,7 +2,10 @@ import express, { Request, Response, NextFunction } from 'express';
 import { getProfile, updateProfile, instructorHome, getSession, createSession,
      updateSession, deleteSession, switchUserRole, sessions, bookedSessions,
       availableSessions, sessionHistory, searchSessions, 
-      fetchNotifications} from '../../controllers/instructorController';
+      fetchNotifications,
+      createMessage,
+      fetchChat,
+      fetchNavbarChatList} from '../../controllers/instructorController';
 import { verifyToken } from '../../middleware/verifyUserToken';
 import { checkUserRole } from '../../middleware/checkUserRole';
 import multer from 'multer';
@@ -41,6 +44,18 @@ router.get('/session-history', verifyToken, checkUserRole('instructor'), asyncHa
 
 router.get('/sessions/search', verifyToken, checkUserRole('instructor'), asyncHandler(searchSessions));  
 router.get('/notifications', verifyToken, checkUserRole('instructor'), asyncHandler(fetchNotifications)); 
+
+
+
+router.get('/notifications', verifyToken, checkUserRole('instructor'), asyncHandler(fetchNotifications)); 
+
+router.post('/chat', verifyToken, checkUserRole('instructor'), asyncHandler(createMessage)); 
+
+router.get('/chat', verifyToken, checkUserRole('instructor'), asyncHandler(fetchChat)); 
+
+router.get('/chat-list', verifyToken, checkUserRole('instructor'), asyncHandler(fetchNavbarChatList)); 
+
+
 
 
 

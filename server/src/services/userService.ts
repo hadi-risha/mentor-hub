@@ -5,6 +5,8 @@ import { ISession } from '../models/sessionModel';
 import { IBooking } from '../models/bookingModel'
 import { IRating } from '../models/ratingModel';
 import { INotification } from '../models/notificationModel';
+import { IChat } from '../models/chatModel';
+import { IMessage } from '../models/messageModel';
 
 // import {IProfile} from '../models/userProfile'
 
@@ -132,6 +134,30 @@ export class UserService {
 
     async fetchNotifications(): Promise<INotification[] | null> {
         return this.userRepository.fetchNotifications()
+    }
+
+    async findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null> {
+        return this.userRepository.findChatWithUserIds(id, chatPartnerId)
+    }
+
+    async createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null> {
+        return this.userRepository.createMessage(messageData)
+    }
+
+    async createChat( chatData: Partial<IChat> ): Promise<IChat | null> {
+        return this.userRepository.createChat(chatData)
+    }
+
+    async updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null> {
+        return this.userRepository.updateChatMessages(chatId, updateChatData )
+    }
+
+    async fetchMessages(messageIds: string[]): Promise<IMessage[] | null> {
+        return this.userRepository.fetchMessages(messageIds)
+    }
+
+    async fetchInteractedUsersList( id: string ): Promise<IChat[] | null> {
+        return this.userRepository.fetchInteractedUsersList(id )
     }
 
 

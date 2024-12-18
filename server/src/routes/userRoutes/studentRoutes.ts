@@ -1,5 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { updateProfile, sessions, session, getProfile, createBooking, fetchNotifications, createBookingAndPayment, switchUserRole, bookedSessions, cancelBooking, searchSessions, sessionHistory,pendingSessions, rateInstructor, completeSessionAndRateInstructor } from '../../controllers/studentController';
+import { updateProfile, sessions, session, getProfile, 
+        fetchNotifications, createBookingAndPayment, 
+        switchUserRole, bookedSessions, cancelBooking, 
+        searchSessions, sessionHistory,pendingSessions, 
+        rateInstructor, completeSessionAndRateInstructor, 
+        createMessage, 
+        fetchChat,
+        fetchNavbarChatList} from '../../controllers/studentController';
 import { verifyToken } from '../../middleware/verifyUserToken';
 import { checkUserRole } from '../../middleware/checkUserRole';
 import multer from 'multer';
@@ -41,6 +48,15 @@ router.post('/rate', verifyToken, checkUserRole('student'), asyncHandler(rateIns
 router.post('/session-complete/rating', verifyToken, checkUserRole('student'), asyncHandler(completeSessionAndRateInstructor)); 
 
 router.get('/notifications', verifyToken, checkUserRole('student'), asyncHandler(fetchNotifications)); 
+
+router.post('/chat', verifyToken, checkUserRole('student'), asyncHandler(createMessage)); 
+
+router.get('/chat', verifyToken, checkUserRole('student'), asyncHandler(fetchChat)); 
+
+router.get('/chat-list', verifyToken, checkUserRole('student'), asyncHandler(fetchNavbarChatList)); 
+
+
+
 
 
 

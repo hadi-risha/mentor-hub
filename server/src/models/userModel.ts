@@ -27,8 +27,8 @@ export interface IUser extends Document {
 
   isBlocked: boolean;
   isRoleChanged: boolean;
-  
 
+  lastActive?: Date;
 }
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -128,7 +128,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-
+  lastActive: { 
+    type: Date, 
+    default: Date.now 
+  },
 } ,{timestamps:true});
 
 export const UserModel = mongoose.model<IUser>("User", userSchema);

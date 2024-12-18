@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import Stripe from 'stripe';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectId } from 'mongodb';
+import { ChatModel, IChat } from '../models/chatModel';
 
 
 
@@ -496,5 +497,136 @@ export const fetchNotifications = async (req: Request, res: Response): Promise<R
   } catch (error) {
     console.error("Error fetching notifications:", error);
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching notifications:" });
+  }
+}
+
+
+export const createMessage = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+    const { chatPartnerId, content  } = req.body;
+    console.log("chatPartnerId", chatPartnerId);
+    
+    
+    if (!chatPartnerId) {
+      console.log("Partner Id is missing");
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
+    }
+
+    if (!content) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Content is missing" });
+    }
+
+    const messageData = {
+      senderId: id,
+      receiverId: chatPartnerId,
+      content
+    }
+    const newMessage = await userService.createMessage(messageData);
+    if (!newMessage) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create message" });
+    }
+
+    if (!newMessage._id) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Message creation failed: Invalid message ID" });
+    }
+
+    // const chatExist = await userService.findChatWithUserIds(id, chatPartnerId);
+    const chatExist: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
+
+
+    if (!chatExist) {
+      const chatData: Partial<IChat> = {
+        usersId: [id, chatPartnerId],
+        messageIds: [newMessage?._id.toString()], // Ensure string[]
+        lastMessageId: newMessage?._id.toString(), // Ensure string
+        unreadCounts: [
+          { userId: chatPartnerId, count: 1 },
+          { userId: id, count: 0 }, // Sender has no unread messages
+        ],
+      };
+
+      const newChat = await userService.createChat(chatData);
+      if (!newChat) {
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create chat" });
+      }
+
+      return res.status(HttpStatus.CREATED).json({ message: "Chat & message created", chat: newChat });
+    }else {
+      const updateChatData = {
+        messageIds: [...(chatExist.messageIds || []), newMessage?._id.toString()],
+        lastMessageId: newMessage?._id.toString(),
+        unreadCounts: [
+          {
+            userId: chatPartnerId,
+            count: chatExist?.unreadCounts?.find(u => u.userId === chatPartnerId)?.count ?? 0 + 1, // Using nullish coalescing for undefined
+          },
+          { userId: id, count: 0 },
+        ],
+      };
+
+      const updatedChat = await userService.updateChatMessages(
+        chatExist._id,
+        updateChatData
+      );
+
+      if (!updatedChat) {
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to update chat" });
+      }
+
+      return res.status(HttpStatus.OK).json({ message: "Message sent and chat updated", chat: updatedChat });
+    }
+  } catch (error) {
+    console.error("Error creating message:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating message" });
+  }
+}
+
+export const fetchChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+
+    // const { chatPartnerId  } = req.body;
+    const chatPartnerId = req.query.chatPartnerId as string;
+    if (!chatPartnerId) {
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
+    }
+
+    const chat: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
+    if (!chat) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
+    }
+
+    // Fetch all messages for the chat, sorted by timestamp 
+    const messages = await userService.fetchMessages(chat.messageIds);
+
+    console.log("chat messages of users-----", messages) 
+
+    return res.status(HttpStatus.OK).json({ message: "Chat fetched successfully", chat, messages });
+  } catch (error) {
+    console.error("Error fetching chat:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+  }
+}
+
+
+export const fetchNavbarChatList = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role", id, role);
+
+    const chatList: IChat[] | null = await userService.fetchInteractedUsersList(id);
+    if (!chatList) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
+    }
+
+    console.log("chatList navbar data--------", chatList);
+  
+    return res.status(HttpStatus.OK).json({ message: "Chat List fetched successfully", chatList, });
+  } catch (error) {
+    console.error("Error fetching chat:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
   }
 }

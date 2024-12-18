@@ -400,7 +400,7 @@ const Header = () => {
         </li>
 
         <li className="flex items-center">
-          <a href={`/${userRole}/chat`}>
+          <a href={`/user/chat`}>
             <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
               <p className='text-black font-serif'>Chat</p>
             </div>

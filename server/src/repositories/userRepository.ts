@@ -5,6 +5,8 @@ import { BookingModel, IBooking } from '../models/bookingModel';
 import mongoose from 'mongoose';
 import { IRating, RatingModel } from '../models/ratingModel';
 import { INotification, NotificationModel } from '../models/notificationModel';
+import { ChatModel, IChat } from '../models/chatModel';
+import { IMessage, MessageModel } from '../models/messageModel';
 
 
 
@@ -519,7 +521,127 @@ export class UserRepository implements IUserRepository {
         }
     }
 
+
     
     
+
+    async findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null> {
+        try {
+            return await ChatModel.findOne({
+              usersId: { $all: [id, chatPartnerId] },
+            })
+            //.populate("usersId", "name email") // Optionally populate user details
+            .populate({
+                path: "usersId",
+                match: { _id: { $ne: id } },
+                select: "_id firstName lastName role image.url", // Populate user details
+            })
+            .populate({
+                path: "messageIds",
+                options: { sort: { timestamp: 1 } }, // Ensure messages are sorted by timestamp
+            })
+            .populate({
+                path: "lastMessageId",
+                select: "_id content timestamp seen senderId", // Populate the last message
+            });
+
+        } catch (error) {
+            throw new Error(`Failed to fetch chat: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+    }
+
+
+    async createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null> {
+        try {
+            const response = new MessageModel({
+                senderId: messageData.senderId, 
+                receiverId: messageData.receiverId,
+                content: messageData.content,
+            });
+
+            await response.save();
+            return response;
+        } catch (error) {
+            throw new Error(`Error creating message: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async createChat( chatData: Partial<IChat> ): Promise<IChat | null> {
+        try {
+            const response = new ChatModel({
+                usersId: chatData.usersId, 
+                messageIds: chatData.messageIds, 
+                lastMessageId: chatData.lastMessageId,
+                unreadCounts: chatData.unreadCounts
+            });
+
+            await response.save();
+            return response;
+        } catch (error) {
+            throw new Error(`Error creating chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null> {
+        try {
+            return await ChatModel.findOneAndUpdate(
+                { _id: chatId },
+                {
+                  $set: {
+                    lastMessageId: updateChatData.lastMessageId,
+                    unreadCounts: updateChatData.unreadCounts,
+                  },
+                  $push: { messageIds: { $each: updateChatData.messageIds || [] } },
+                },
+                { new: true }
+              );
+        } catch (error) {
+            throw new Error(`Error updating chat: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+
+
+
+    async fetchMessages(messageIds: string[]): Promise<IMessage[] | null> {
+        try {
+          return await MessageModel.find({ _id: { $in: messageIds } })
+            .sort({ timestamp: 1 }) // Sort messages by `timestamp` in ascending order
+            .populate("senderId", "name email") // Populate sender details
+            .populate("receiverId", "name email"); // Populate receiver details
+        } catch (error) {
+          throw new Error(`Failed to fetch messages: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+    }
+
+
+
+
+
+
+    async fetchInteractedUsersList(currentUserId: string): Promise<IChat[] | null> {
+        try {
+            return await ChatModel.find({
+                usersId: { $in: [currentUserId] }, // Include chats where the current user is a participant
+                })
+                .sort({ updatedAt: -1 }) // Sort by the latest activity
+                .populate({
+                    path: "usersId",
+                    match: { _id: { $ne: currentUserId } },
+                    select: "_id firstName lastName role image.url", // Populate user details
+                })
+                .populate({
+                    path: "lastMessageId",
+                    select: "_id content timestamp seen senderId", // Populate the last message
+                });
+        } catch (error) {
+            throw new Error(
+                `Failed to fetch messages: ${
+                    error instanceof Error ? error.message : "Unknown error"
+                }`
+            );
+        }
+    }
     
+
 }

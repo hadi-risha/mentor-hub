@@ -37,6 +37,7 @@ import InstructorSessionHistory from "../pages/instructor/SessionHistory";
 import StdMeetingRoom from "../pages/student/MeetingRoom";
 import MeetingRoomPage from "../pages/sharedPages/MeetingRoom";
 import Notifications from "../pages/sharedPages/Notification";
+import StudentChat from "../pages/student/studentChat";
 
 
 interface UserRoutesProps {
@@ -67,6 +68,7 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
             {/* Shared Routes for all authenticated users */}
             <Route path="/user/meeting-room/:meetingRoomId" element={<MeetingRoomPage />} /> 
             <Route path="/user/notifications" element={<Notifications />} /> 
+            <Route path="/user/chat" element={<StudentChat />} /> 
 
             {/* Routes for Student */}
             {userRole === "student" ? (
@@ -89,7 +91,11 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
                 <Route path="/student/upcoming-sessions" element={<ProtectedRoute><UpcomingSessions /></ProtectedRoute>} />   
                 <Route path="/student/reserved-session/:id" element={<ProtectedRoute><ReservedSessionInfo /></ProtectedRoute>} /> 
-                <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} />  
+                <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} /> 
+
+
+                {/* <Route path="/student/chat" element={<ProtectedRoute><StudentChat /></ProtectedRoute>} />   */}
+ 
 
 
                 {/* <Route path="/student/meeting-room/:meetingRoomId" element={<ProtectedRoute><StdMeetingRoom /></ProtectedRoute>} />    */}
@@ -133,7 +139,7 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
             ) : (
               
               <>
-                {console.error("error in user routes")}
+                {/* {console.error("error in user routes")} */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
               </>
             )}
