@@ -52,7 +52,7 @@ const sessionSchema: Schema<ISession> = new mongoose.Schema({
         required: true 
     },
     timeSlots: { 
-        type: [String], // Array of Date objects directly
+        type: [String], 
         required: true 
     },
     coverImage: {

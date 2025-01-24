@@ -27,6 +27,12 @@ interface Config {
   stripePublishableKey: string;
   stripeSecretKey: string;
 
+  imageKitEndpoint: string;
+  imageKitPublicKey: string;
+  imageKitPrivateKey: string;
+
+ 
+
 }
 
 const config: Config = {
@@ -52,6 +58,11 @@ const config: Config = {
 
   stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+
+  imageKitEndpoint: process.env.IMAGE_KIT_ENDPOINT || '',
+  imageKitPublicKey: process.env.IMAGE_KIT_PUBLIC_KEY || '',
+  imageKitPrivateKey: process.env.IMAGE_KIT_PRIVATE_KEY || '',
+
 };
 
 export default config;

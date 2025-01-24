@@ -10,6 +10,9 @@ const MeetingRoomPage = () => {
     const queryParams = new URLSearchParams(location.search);
     const bookingId = queryParams.get('bookingId');
     const sessionId = queryParams.get('sessionId');
+
+    console.log("bookingId, sessionId----", bookingId, sessionId);
+    
     
     
     localStorage.setItem("isCallEnded", "false");

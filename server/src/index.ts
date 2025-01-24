@@ -4,7 +4,6 @@ import helmet from "helmet";
 import session from 'express-session';
 import passport from 'passport';
 import './auth/passport';
-import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes/authRoutes';
 import studentRoutes from './routes/userRoutes/studentRoutes';
 import instructorRoutes from './routes/userRoutes/instructorRoutes';
@@ -16,7 +15,13 @@ import { HttpStatus } from './utils/httpStatusCodes';
 import errorHandler from './middleware/errorHandler';
 import './utils/logCleaner';
 import cookieParser from 'cookie-parser';
+import { Socket } from "socket.io";
+import connectDB from './config/db'
+import { log } from 'winston';
+import ImageKit from "imagekit";
 
+
+connectDB();
 const app: Express = express();
 
 app.use(
@@ -48,6 +53,27 @@ app.use(express.urlencoded({ limit: '30mb', extended: true }));
 
 app.use(cookieParser());
 
+// store ai related images
+const imagekit = new ImageKit({
+  urlEndpoint: config.imageKitEndpoint,
+  publicKey: config.imageKitPublicKey,
+  privateKey: config.imageKitPrivateKey,
+});
+
+
+app.get("/api/ai/upload", (req, res) => {
+  // const result = imagekit.getAuthenticationParameters();
+  // res.send(result);
+  try {
+    const result = imagekit.getAuthenticationParameters();
+    console.log("result in server ai uploads :- ", result);
+    // res.send(result);
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error getting authentication parameters:", error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
 
 /* ROUTES */
 app.use('/api/auth', userRoutes);
@@ -61,22 +87,95 @@ console.log("mongoUrl...", config.mongoUrl);
 if (!config.mongoUrl) {
     throw new Error("MONGO_URL environment variable is not defined");
 }
-const connectDB = async () => {
-    try {
-        await mongoose.connect(config.mongoUrl);
-        console.log('MongoDB connected');
-        app.listen(config.port, () => console.log(`Server running at: http://${config.host}:${config.port}`));
-    } catch (err) {
-        console.error('MongoDB connection error:', err);
-    }
-};
-connectDB();
+
+
+console.log("publicKey: config.imageKitPublicKey,", config.imageKitPublicKey,);
+
+
+
 
 
 app.get('/', (req, res) => {
   console.log('Received request at /');
   res.status(HttpStatus.OK).json({ message: "hello from home", text: "hlo world" });
 });
+
+
+const server = app.listen(
+    config.port, () => {
+    console.log(`Server running at: http://${config.host}:${config.port}`);
+});
+
+
+const io = require("socket.io")(server, {
+  pingTimeout: 60000,
+  cors: {
+      origin: `${config.frontendUrl}`,
+    
+    // credentials: true,
+  },
+});
+
+// move to interfaces
+interface User {
+  _id: string;
+  firstName: string;
+  lastName: string;
+}
+
+
+io.on("connection", (socket: Socket) => {
+  console.log("Connected to socket.io"); 
+  console.log("socket itself", socket);
+
+  
+  console.log('New client connected:', socket.id); 
+  
+  socket.on("setup", (userData) => {
+      console.log("userData in socketio", userData);     
+      socket.join(userData._id);
+      socket.emit("connected");
+  });
+
+  // when click a chat this will create a particular room for all users
+  socket.on("join chat", (room: string) => {
+      socket.join(room);
+      console.log("User Joined Room: " + room);  //shows chatid
+  });
+
+  socket.on("typing", (room: string) => socket.in(room).emit("typing"));
+  socket.on("stop typing", (room: string) => socket.in(room).emit("stop typing"));
+
+
+  socket.on("new message", (newMessageRecieved) => {
+    console.log("newMessageRecieved", newMessageRecieved); 
+    console.log(" newMessageRecieved.chatId", newMessageRecieved.chat); 
+    console.log(" newMessageRecieved.senderId", newMessageRecieved.sender); 
+
+    let chat = newMessageRecieved.chat;
+    
+    if (!chat.users) return console.log("chat.users not defined");
+    
+    chat.users.forEach((user: User) => {
+      console.log("each user :- ", user);
+      if (user._id == newMessageRecieved.sender._id) return;
+      socket.in(user._id).emit("message recieved", newMessageRecieved); //by taking the obj in frontend we compare does the currectly actived chat is this or not, and so on
+
+      // if (user._id !== newMessageRecieved.sender._id) {
+      //   console.log("in here how many times printed" );
+      //   socket.in(user._id).emit("message recieved", newMessageRecieved);
+      // }
+      
+      console.log("message sent to", user?.firstName, user?.lastName);
+    });
+  });
+
+  socket.off("setup", (userData) => {
+      console.log("USER DISCONNECTED");
+      socket.leave(userData._id);
+  });
+});
+
 
 app.use(errorHandler);
 

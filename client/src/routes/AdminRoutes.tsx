@@ -64,7 +64,7 @@ function AdminRoutes({ token }: AdminRoutesProps) {
           {/* <Route path="/admin/login" element={<NewAdminLogin />} />    */}  {/* new admin login  */}
           
 
-          <Route path="/admin/login" element={<SuperAdminLogin />} />  {/* super admin login  */}
+          <Route path="/admin/login" element={<AdminLogin />} />  {/* super admin login  */}
         </Routes>
       )}
     </>

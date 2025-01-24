@@ -31,6 +31,7 @@ const SingleSessionInfo = () => {
 
     const [session, setSession] = useState<ISession>(); 
     const [loading, setLoading] = useState(true);
+    const [wishlistStatus, setWishlistStatus] = useState(false);
 
     useEffect(() => {
         async function fetchSession() {
@@ -73,6 +74,45 @@ const SingleSessionInfo = () => {
 
     const handleButtonClick = (id: string) => {
         navigate(`/student/book-session/${id}`);
+    };
+
+
+
+    useEffect(() => {
+        async function isSessionInWishlist() {
+          try {
+            const response = await axiosInstance.post(`/student/wishlist/check}`, {sessionId : id}); 
+
+            console.log("response, checking session is in wishlist or not", response.data.wishlist);
+            
+            setWishlistStatus(response.data.wishlist.isInWislist)
+            setLoading(false);
+          } catch (error) {
+            console.error('Failed to fetch wishlist status:', error);
+            setLoading(false);
+          }
+        };
+        isSessionInWishlist();
+    }, []);
+
+
+    const patchWishlist = async () => {
+
+        try {
+        const response = await axiosInstance.patch(
+            `/student/wishlist`, {sessionId: id}
+        );
+        console.log("Response data: wishlist", response.data.isInWishlist);
+        
+        const message = response?.data?.message;
+        console.log("patch likes Parsed posts:", message);
+
+        setWishlistStatus(response.data.isInWishlist)
+        setLoading(false);
+        } catch (error) {
+        console.error("Failed to update wishlist:", error);
+        setLoading(false);
+        }
     };
   
 
@@ -170,6 +210,23 @@ const SingleSessionInfo = () => {
                                 <p className='w-8/12 text-gray-600 text-sm ml-8 pr-3 mt-2'>{session?.description}
                                 </p>
                             </div>
+
+                            {/* <div className="flex justify-center items-center mt-10 p-5 w-[200px] font-bold text-rose-600 border border-rose-600 border-dotted">
+                                Add to wishlist
+                            </div> */}
+
+                            <div className="flex justify-center items-center mt-10 p-5 w-[200px] font-bold text-rose-600 border border-rose-600 border-dotted">
+                                {wishlistStatus ? (
+                                    <div onClick={patchWishlist} className="cursor-pointer">
+                                        Added to wishlist
+                                    </div>
+                                ) : (
+                                    <div onClick={patchWishlist} className="cursor-pointer">
+                                    Add to wishlist
+                                    </div>
+                                )}
+                            </div>
+
                         </div>
 
                     </div>

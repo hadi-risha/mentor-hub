@@ -38,6 +38,18 @@ import StdMeetingRoom from "../pages/student/MeetingRoom";
 import MeetingRoomPage from "../pages/sharedPages/MeetingRoom";
 import Notifications from "../pages/sharedPages/Notification";
 import StudentChat from "../pages/student/studentChat";
+import CreatePost from "../pages/instructor/createPost";
+import AllPosts from "../pages/instructor/AllPosts";
+import RecentSessions from "../pages/student/RecentSessions";
+import Wallet from "../pages/instructor/Wallet";
+import AiHomepage from "../pages/sharedPages/ai/homepage/AiHomepage";
+import AiDashboardPage from "../pages/sharedPages/ai/dashboardPage/AiDashboardPage";
+import AiChatPage from "../pages/sharedPages/ai/chatPage/AiChatPage";
+import DashboardLayout from "../aiLayouts/dashboardLayout/DashboardLayout";
+import ChangePassword from "../pages/sharedPages/ChangePassword";
+import PostsWidget from "../pages/sharedPages/PostsWidget.jsx";
+import CancelledSessionInfo from "../pages/student/CancelledSessionInfo";
+import Wishlist from "../pages/student/Wishlist";
 
 
 interface UserRoutesProps {
@@ -69,6 +81,24 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
             <Route path="/user/meeting-room/:meetingRoomId" element={<MeetingRoomPage />} /> 
             <Route path="/user/notifications" element={<Notifications />} /> 
             <Route path="/user/chat" element={<StudentChat />} /> 
+            {/* <Route path="/user/posts" element={<AllPosts />} />  */}
+
+            <Route path="/user/ai/home" element={<AiHomepage />} /> 
+            {/* <Route path="/user/ai/dashboard" element={<AiDashboardPage />} /> 
+            <Route path="/user/ai/dashboard/chats/:id" element={<AiChatPage />} /> */}
+            <Route path="/user/ai" element={<DashboardLayout />}>
+              <Route path="/user/ai/dashboard" element={<AiDashboardPage />} />
+              <Route path="/user/ai/dashboard/chats/:id" element={<AiChatPage />} />
+            </Route>
+
+            <Route path="/user/reset-password" element={<ChangePassword />} /> 
+
+
+            <Route path="/user/posts" element={<PostsWidget />} /> 
+
+
+
+          
 
             {/* Routes for Student */}
             {userRole === "student" ? (
@@ -76,13 +106,14 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 {/* <Route path="/student/modal" element={<ProtectedRoute><UserModal /></ProtectedRoute>} />  */}
                 <Route path="/student/home" element={<ProtectedRoute><StudentHome /></ProtectedRoute>} /> 
                 <Route path="/student/sessions" element={<ProtectedRoute><StudentAllSessions /></ProtectedRoute>} /> 
+                <Route path="/student/session/:id" element={<ProtectedRoute><SingleSessionInfo /></ProtectedRoute>} />
+
 
                 <Route path="/student/instructors" element={<ProtectedRoute><ViewInstructors /></ProtectedRoute>} /> 
 
                 <Route path="/student/profile" element={<ProtectedRoute><StudentProfile /></ProtectedRoute>} />
                 <Route path="/student/update-profile" element={<ProtectedRoute><UpdateProfile /></ProtectedRoute>} />
 
-                <Route path="/student/session/:id" element={<ProtectedRoute><SingleSessionInfo /></ProtectedRoute>} />
                 <Route path="/student/book-session/:sessionId" element={<ProtectedRoute><StudentBookSession /></ProtectedRoute>} />  
                 <Route path="/student/session-payment/:sessionId" element={<ProtectedRoute><SessionPayment /></ProtectedRoute>} />    
 
@@ -91,14 +122,19 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
 
                 <Route path="/student/upcoming-sessions" element={<ProtectedRoute><UpcomingSessions /></ProtectedRoute>} />   
                 <Route path="/student/reserved-session/:id" element={<ProtectedRoute><ReservedSessionInfo /></ProtectedRoute>} /> 
+
+                <Route path="/student/cancelled-session/:id" element={<ProtectedRoute><CancelledSessionInfo /></ProtectedRoute>} /> 
+
+
                 <Route path="/student/session-history" element={<ProtectedRoute><SessionHistory /></ProtectedRoute>} /> 
 
 
-                {/* <Route path="/student/chat" element={<ProtectedRoute><StudentChat /></ProtectedRoute>} />   */}
- 
+                <Route path="/student/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />  
 
+                <Route path="/student/recent-sessions" element={<ProtectedRoute><RecentSessions /></ProtectedRoute>} /> 
 
-                {/* <Route path="/student/meeting-room/:meetingRoomId" element={<ProtectedRoute><StdMeetingRoom /></ProtectedRoute>} />    */}
+                <Route path="/student/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} /> 
+
 
                 <Route path="*" element={<Navigate to="/student/home" replace />} />
               </>
@@ -117,6 +153,18 @@ function UserRoutes({ token, userRole }: UserRoutesProps) {
                 <Route path="/instructor/all-sessions" element={<ProtectedRoute><AllSessions /></ProtectedRoute>} />  {/* get instructor all available sessions for delete& update */}
                 <Route path="/instructor/booked-sessions" element={<ProtectedRoute><BookedSessions /></ProtectedRoute>} /> 
                 <Route path="/instructor/session-history" element={<ProtectedRoute><InstructorSessionHistory /></ProtectedRoute>} /> 
+
+
+
+
+                <Route path="/instructor/create-post" element={<ProtectedRoute><CreatePost /></ProtectedRoute>} />  
+
+                  <Route path="/instructor/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />  
+
+
+                {/* <Route path="/instructor/all-posts" element={<ProtectedRoute><AllPosts /></ProtectedRoute>} />  get instructor all available sessions for delete& update */}
+
+
 
 
 

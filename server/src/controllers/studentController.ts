@@ -4,12 +4,21 @@ import { uploadImageToS3 } from '../utils/s3Service';
 import config from '../config/config'
 import { HttpStatus } from '../utils/httpStatusCodes';
 import { log } from 'winston';
-import { IBooking } from '../models/bookingModel';
+import { BookingModel, IBooking } from '../models/bookingModel';
 import mongoose from "mongoose"; 
 import Stripe from 'stripe';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs'; 
 import { ObjectId } from 'mongodb';
 import { ChatModel, IChat } from '../models/chatModel';
+import { UserModel } from '../models/userModel';
+import { MessageModel } from '../models/messageModel';
+import { AiChatModel } from '../models/aiChat';
+import { AiUserChatsModel } from '../models/aiUserChats';
+import { PostModel } from '../models/postModel';
+import { SessionModel } from '../models/sessionModel';
+// import { getReceiverSocketId, io } from '../utils/socket';
+
 
 
 
@@ -181,42 +190,6 @@ export const createBooking = async (req: Request, res: Response): Promise<Respon
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating booking:" });
   }
 }
-
-// export const stripePayment = async (req: Request, res: Response): Promise<Response> => {
-//   let token = req.header("Authorization"); 
-//   const {id, role} = req.userData as IUserData;
-//   console.log("id, role", id, role);
-//   console.log("token in student payment", token);
-
-//   const { sessionId, selectedDate, selectedTimeSlot, concerns, amount } =req.body;
-//   console.log("sessionId, selectedDate, selectedTimeSlot, concerns", sessionId, selectedDate, selectedTimeSlot, concerns);
-//   console.log("amount",amount);
-//   try {
-//     const session = await stripe.checkout.sessions.create({
-//       payment_method_types: ['card'],
-//       line_items: [
-//           {
-//             price_data: {
-//                 currency: 'usd',
-//                 product_data: {
-//                     name: 'Session Booking', // Static product name
-//                 },
-//                 unit_amount: amount, // Amount in cents
-//             },
-//             quantity: 1,
-//           },
-//       ],
-//       mode: 'payment',
-//       success_url: `${config.frontendUrl}/student/payment-succes`, // Success page URL
-//       cancel_url: `${config.frontendUrl}/student/payment-cancel`,   // Cancel page URL
-//     });
-
-//     return res.status(HttpStatus.OK).json({ message: "Payment successfull", url: session.url });
-//   } catch (error) {
-//     console.error("Error creating booking:", error);
-//     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating booking:" });
-//   }
-// }
 
 
 export const createBookingAndPayment = async (req: Request, res: Response): Promise<Response> => {
@@ -396,8 +369,6 @@ export const pendingSessions = async (req: Request, res: Response): Promise<Resp
   console.log("token in student payment", token);
   try {
     const bookedSessions = await userService.pendingSessions(id)
-    // const bookedSessions = await userService.bookedSessions(id)
-
     
     console.log("Booked sessions : ", bookedSessions);
     
@@ -443,13 +414,9 @@ export const completeSessionAndRateInstructor = async (req: Request, res: Respon
     console.log("id, role", id, role);
 
 
-    // const { bookingId } = req.body;
-
     const { sessionId, bookingId, rating, feedback } = req.body;
     console.log("bookingId......hh.........", bookingId);
     
-    log
-    // Validate rating options
     if (!["poor", "good", "excellent"].includes(rating)) {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: "Invalid rating value." });
     }
@@ -501,132 +468,724 @@ export const fetchNotifications = async (req: Request, res: Response): Promise<R
 }
 
 
-export const createMessage = async (req: Request, res: Response): Promise<Response> => {
+
+
+
+export const allMessages = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const messages = await MessageModel.find({ chat: req.params.chatId })
+      .populate("sender", "_id firstName lastName email image.url")
+      .populate("chat", "_id users latestMessage isGroupChat chatName groupAdmin");
+    
+    console.log("messages ---- all messages", messages);
+    
+    return res.status(HttpStatus.OK).json({ message: "All messages successfully fetched", messages: messages });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching all messages." });
+  }
+};
+
+export const sendMessage = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { content, chatId } = req.body;
+
+    if (!content || !chatId) {
+      console.log("Invalid data passed into request");
+      return res.status(400).json({ message: "Invalid data passed into request" });
+    }
+
+    const newMessage = {
+      sender: id,
+      content,
+      chat: chatId,
+    };
+
+    // Create the message
+    let message: any = await MessageModel.create(newMessage);
+
+    console.log("message in createMessage 1 :- ", message);
+    
+
+    if (!message) {
+      console.log("Message not found after creation");
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    message = await message.
+              populate("sender", "_id firstName lastName email image.url role")  // new message also has a sender so fetch all details
+
+    console.log("message (sender) in createMessage 2 :- ", message);
+
+
+    // Populate the chat details and nested users within chat
+    message = await message.populate({
+      path: "chat",
+      select: "_id users latestMessage isGroupChat chatName groupAdmin",
+      populate: {
+        path: "users",
+        select: "_id firstName lastName email image.url role",
+      },
+    });
+
+    console.log("message (chat), (chat.users) in createMessage 3 :- ", message);
+              
+    
+    await ChatModel.findByIdAndUpdate(chatId, { latestMessage: message });
+
+    return res
+      .status(HttpStatus.OK)
+      .json({ message: "Message successfully sent", messageData: message });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "An error occurred while sending the message." });
+  }
+};
+
+
+
+//select a specific user to chat from the search
+export const accessChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const  chatPartnerId  = req.body.userId;
+    console.log("Chat Partner ID:", chatPartnerId);
+
+    if (!chatPartnerId) {
+      console.log("Partner ID is missing");
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner ID is required to access chat." });
+    }
+
+    // Check if a chat already exists
+    const existingChats = await ChatModel.find({
+      isGroupChat: false,
+      $and: [
+        { users: { $elemMatch: { $eq: id } } },
+        { users: { $elemMatch: { $eq: chatPartnerId } } },
+      ],
+    })
+      .populate("users", "_id firstName lastName email image.url")
+      // .populate("latestMessage");
+
+      console.log("existingChats-------1", existingChats);
+
+    // Populate last message sender details
+    const populatedChats = await UserModel.populate(existingChats, {
+      path: "latestMessage.sender",
+      select: "_id firstName lastName email image.url",
+    });
+
+    console.log("populatedChats---------==2", populatedChats);
+    
+
+    // Return existing chat if found
+    if (populatedChats.length > 0) {
+
+      console.log("populatedChats---3", populatedChats);
+      console.log("populatedChats[0]  4", populatedChats[0]);  //actually this is not only a single user detaiols , its the wole chat and user details of both users
+      
+       return res.status(HttpStatus.OK).json({ message: "Chat found", chat: populatedChats[0] });
+    }
+
+    // Create a new chat if no existing chat
+    const newChatData = {
+      chatName: "sender",
+      isGroupChat: false,
+      users: [id, chatPartnerId],
+    };
+
+    const createdChat = await ChatModel.create(newChatData);
+
+    console.log("createdChat in search", createdChat)
+    const fullChat = await ChatModel.findOne({ _id: createdChat._id })
+    .populate(
+      "users", 
+      "_id firstName lastName email image.url"
+    )
+
+    console.log("fullchat in accessacht 5", fullChat)
+
+    return res.status(HttpStatus.CREATED).json({ message: "New chat created successfully", chat: fullChat });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while accessing or creating the chat." });
+  }
+};
+
+
+export const createGroupChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    console.log("in group chat create");
+    
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    if (!req.body.name) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill the name" });
+    }
+
+    if (!req.body.users) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill all the feilds" });
+    }
+    console.log("req.body.name, req.body.users", req.body.name, req.body.users);
+
+    var users = JSON.parse(req.body.users);
+
+    if (users.length < 2) {
+      console.log("need more than 2 users");
+      
+      return res
+        .status(400)
+        .send("More than 2 users are required to form a group chat");
+    }else{
+      console.log("yey more than 2 users there");
+      
+    }
+
+    users.push(id);
+
+    const groupChat = await ChatModel.create({
+      chatName: req.body.name,
+      users: users,
+      isGroupChat: true,
+      groupAdmin: id,
+    });
+    console.log("groupChat created", groupChat);
+    
+
+    const fullGroupChat = await ChatModel.findOne({ _id: groupChat._id })
+      .populate("users", "_id firstName lastName email image.url")
+      .populate("groupAdmin", "_id firstName lastName email image.url");
+
+      console.log("fullGroupChat--", fullGroupChat);
+
+    
+    return res.status(HttpStatus.OK).json({ message: "Group chat created successfully", fullGroupChat });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while creating group chat." });
+  }
+};
+
+
+export const renameGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, chatName } = req.body;
+    if (!chatName) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill the name" });
+    }
+
+    const updatedChat = await ChatModel.findByIdAndUpdate(
+        chatId,
+      {
+        chatName: chatName,
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    console.log("updatedChat", updatedChat);
+
+    if (!updatedChat) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    } 
+
+    return res.status(HttpStatus.OK).json({ message: "Group name updated successfully", updatedChat });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while updating community name." });
+  }
+};
+
+export const addToGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, userId } = req.body;
+
+    const added = await ChatModel.findByIdAndUpdate(
+      chatId,
+      {
+        $push: { users: userId },
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    if (!added) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    }
+
+    return res.status(HttpStatus.OK).json({ message: "Successfully added user", added: added });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while adding user." });
+  }
+};
+
+export const removeFromGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, userId } = req.body;
+
+    const removed = await ChatModel.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { users: userId },
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    if (!removed) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    }
+
+    return res.status(HttpStatus.OK).json({ message: "Successfully removed user from group", removed: removed });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while removing user from community." });
+  }
+};
+
+export const fetchChats = async (req: Request, res: Response): Promise<Response> => {
+  console.log("in fetchChats----------");
+
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    return ChatModel.find({ users: { $elemMatch: { $eq: id } } })
+      .populate("users", "_id firstName lastName email role image.url")
+      .populate("groupAdmin", "_id firstName lastName email role image.url")
+      .populate("latestMessage", "_id content createdAt")
+      .sort({ updatedAt: -1 })
+      .then(async (results: any) => {
+        results = await UserModel.populate(results, {
+          path: "latestMessage.sender",
+          select: "_id firstName lastName email role image.url",
+        });
+
+        console.log("populatedResults in fetchchats :- ", results);
+
+        return res.status(HttpStatus.OK).json({ message: "Chat list successfully fetched", chatList: results, });
+      })
+      .catch((error) => {
+        console.error("Error fetching chats:", error.message);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          message: "An error occurred while accessing the chat list.",
+        });
+      });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred while accessing the chat list.",
+    });
+  }
+};
+
+
+
+export const allUsers = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    console.log('searcch query for chat header', req.query.search)
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const keyword = req.query.search ? {
+        $or: [
+          { firstName: { $regex: req.query.search, $options: "i" } },
+          { lastName: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+    : {};
+    
+    const users = await UserModel.find(keyword).find({ _id: { $ne: id } });
+    console.log("users in allUsers------",users)
+    return res.status(HttpStatus.OK).json({ message: "All users successfully fetched", users: users });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching all users." });
+  }
+};
+
+
+
+export const getFeedPosts = async (req: Request, res: Response): Promise<Response> => {
+  let token = req.header("Authorization"); 
+  const {id, role} = req.userData as IUserData;
+  console.log("id, role", id, role);
+  console.log("token ", token);
+  try {
+    const allPosts = await userService.fetchPosts()
+    console.log("allPosts : ", allPosts);
+    
+    return res.status(HttpStatus.OK).json({ message: "Posts fetched successfully", posts: allPosts });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching posts:" });
+  }
+}
+
+
+export const likePost = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {id, role} = req.userData as IUserData;
     console.log("id, role", id, role);
-    const { chatPartnerId, content  } = req.body;
-    console.log("chatPartnerId", chatPartnerId);
-    
-    
-    if (!chatPartnerId) {
-      console.log("Partner Id is missing");
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
+
+    const { postId } = req.params;
+
+    const post = await PostModel.findById(postId);
+
+    if (!post?.likes) {
+      throw new Error("Post likes are undefined");
     }
 
-    if (!content) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Content is missing" });
+    const isLiked = post?.likes?.get(id);  //get - in Map, this method checks if the userId exists as a key
+    if (isLiked) {
+        post?.likes?.delete(id); //delete - in Map, removing like(or userid) from already liked post,
+    }else{
+        post?.likes?.set(id, true);  //userId is the key, true is the value 
     }
 
-    const messageData = {
-      senderId: id,
-      receiverId: chatPartnerId,
-      content
-    }
-    const newMessage = await userService.createMessage(messageData);
-    if (!newMessage) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create message" });
-    }
+    const updatedPost = await PostModel.findByIdAndUpdate(
+        postId,
+        {likes: post.likes}, 
+        { new: true }  //if do not specify this option or set it to false, Mongoose will return the og document before the update.
+    ); 
 
-    if (!newMessage._id) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Message creation failed: Invalid message ID" });
-    }
+    const updatedPostData = await PostModel.findById(updatedPost?._id).populate({
+      path: 'instructorId',
+      select: '_id firstName lastName role country image.url',
+    });
 
-    // const chatExist = await userService.findChatWithUserIds(id, chatPartnerId);
-    const chatExist: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
+    return res.status(HttpStatus.OK).json({ message: "Post updated successfully", updatedPost: updatedPostData });
+  } catch (error) {
+    console.error("Error updating likes:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error updating likes:" });
+  }
+}
 
+export const createAiChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
 
-    if (!chatExist) {
-      const chatData: Partial<IChat> = {
-        usersId: [id, chatPartnerId],
-        messageIds: [newMessage?._id.toString()], // Ensure string[]
-        lastMessageId: newMessage?._id.toString(), // Ensure string
-        unreadCounts: [
-          { userId: chatPartnerId, count: 1 },
-          { userId: id, count: 0 }, // Sender has no unread messages
-        ],
-      };
+    const { text } = req.body;
 
-      const newChat = await userService.createChat(chatData);
-      if (!newChat) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create chat" });
-      }
+    const newChat = new AiChatModel({
+      userId: id,
+      history: [{ role: "user", parts: [{ text }] }],
+    });
 
-      return res.status(HttpStatus.CREATED).json({ message: "Chat & message created", chat: newChat });
-    }else {
-      const updateChatData = {
-        messageIds: [...(chatExist.messageIds || []), newMessage?._id.toString()],
-        lastMessageId: newMessage?._id.toString(),
-        unreadCounts: [
+    console.log("newChat", newChat);
+
+    const savedChat = await newChat.save();
+
+     // CHECK IF THE USERCHATS EXISTS
+    const userChats = await AiUserChatsModel.find({ userId: id });
+
+    // IF DOESN'T EXIST CREATE A NEW ONE AND ADD THE CHAT IN THE CHATS ARRAY
+    if (!userChats.length) {
+      console.log("chats doenst exist so create a new chats");
+      
+      const newUserChats = new AiUserChatsModel({
+        userId: id,
+        chats: [
           {
-            userId: chatPartnerId,
-            count: chatExist?.unreadCounts?.find(u => u.userId === chatPartnerId)?.count ?? 0 + 1, // Using nullish coalescing for undefined
+            _id: savedChat._id,
+            title: text.substring(0, 40),
           },
-          { userId: id, count: 0 },
         ],
-      };
+      });
 
-      const updatedChat = await userService.updateChatMessages(
-        chatExist._id,
-        updateChatData
+      console.log("newUserChats", newUserChats);
+      
+
+      await newUserChats.save();
+      return res.status(HttpStatus.CREATED).json({ message: "New Ai chat created successfully", newChatId: savedChat._id });
+
+    }else {
+      console.log("chats already exist so push id to chats");
+      // IF EXISTS, PUSH THE CHAT TO THE EXISTING ARRAY
+      await AiUserChatsModel.updateOne(
+        { userId: id },
+        {
+          $push: {
+            chats: {
+              _id: savedChat._id,
+              title: text.substring(0, 40),
+            },
+          },
+        }
       );
 
-      if (!updatedChat) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to update chat" });
-      }
-
-      return res.status(HttpStatus.OK).json({ message: "Message sent and chat updated", chat: updatedChat });
+      return res.status(HttpStatus.CREATED).json({ message: "New Ai chat created successfully",  newChatId: newChat._id});
     }
-  } catch (error) {
-    console.error("Error creating message:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating message" });
+  } catch (error: any) {
+    console.error("Error creating Ai chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while creating the AI chat." });
   }
-}
+};
 
-export const fetchChat = async (req: Request, res: Response): Promise<Response> => {
+export const fetchAiChatlist = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const {id, role} = req.userData as IUserData;
-    console.log("id, role", id, role);
+    const { id, role } = req.userData as IUserData;
 
-    // const { chatPartnerId  } = req.body;
-    const chatPartnerId = req.query.chatPartnerId as string;
-    if (!chatPartnerId) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
-    }
-
-    const chat: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
-    if (!chat) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
-    }
-
-    // Fetch all messages for the chat, sorted by timestamp 
-    const messages = await userService.fetchMessages(chat.messageIds);
-
-    console.log("chat messages of users-----", messages) 
-
-    return res.status(HttpStatus.OK).json({ message: "Chat fetched successfully", chat, messages });
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+    const userChats = await AiUserChatsModel.find({ userId: id });
+    return res.status(HttpStatus.OK).json({ message: "User Ai chat list fetched successfully",  userChats: userChats[0].chats});
+  } catch (error: any) {
+    console.error("Error fetching Ai chatlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching the AI chat list." });
   }
-}
+};
 
-
-export const fetchNavbarChatList = async (req: Request, res: Response): Promise<Response> => {
+export const fetchSingleChat = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const {id, role} = req.userData as IUserData;
-    console.log("id, role", id, role);
+    const { id, role } = req.userData as IUserData;
+    const chatId = req.params.id;
 
-    const chatList: IChat[] | null = await userService.fetchInteractedUsersList(id);
-    if (!chatList) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
+    console.log("chatId----==", chatId);
+    
+    const chat = await AiChatModel.findOne({ _id: chatId, userId: id });
+    console.log("chat--------chat :-", chat);
+    
+    return res.status(HttpStatus.OK).json({ message: "User Ai chat fetched successfully",  chat: chat});
+
+  } catch (error: any) {
+    console.error("Error fetching Ai chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching the AI chat." });
+  }
+};
+
+
+
+export const updateExistingChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    const chatId = req.params.id;
+    
+    console.log("chatId----==", chatId);
+
+    const { question, answer, img } = req.body;
+
+    console.log("question, answer, img", question, answer, img);
+    
+
+    const newItems = [
+      ...(question
+        ? [{ role: "user", parts: [{ text: question }], ...(img && { img }) }]
+        : []),
+      { role: "model", parts: [{ text: answer }] },
+    ];
+
+    const updatedChat = await AiChatModel.updateOne(
+      { _id: chatId, userId: id },
+      {
+        $push: {
+          history: {
+            $each: newItems,
+          },
+        },
+      },
+      { new: true } 
+    );
+
+    console.log("updatedChat-------- :-", updatedChat);
+    
+    return res.status(HttpStatus.OK).json({ message: "User Ai conversation added successfully",  updatedChat: updatedChat});
+
+  } catch (error: any) {
+    console.error("Error adding conversation:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while adding conversation." });
+  }
+};
+
+export const changePassword = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+
+    const { password, confirmPassword } = req.body;
+
+    if (!password || !confirmPassword) {
+      return res.status(400).json({ message: 'Password and Confirm Password are required' });
     }
 
-    console.log("chatList navbar data--------", chatList);
-  
-    return res.status(HttpStatus.OK).json({ message: "Chat List fetched successfully", chatList, });
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error: any) {
+    console.error("Error fetching Ai chatlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while reset password." });
   }
-}
+};
+
+
+export const toggleWishlist = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    const { sessionId } = req.body;
+
+    const user = await UserModel.findById(id); 
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    user.wishlistSessionIds = user.wishlistSessionIds || [];
+
+    if (user.wishlistSessionIds.includes(sessionId)) {
+      // Remove the sessionId from the wishlist
+      user.wishlistSessionIds = user.wishlistSessionIds.filter(id => id !== sessionId);
+      await user.save();
+      return res.status(200).json({ message: 'Session removed from wishlist', isInWishlist: false });
+    } else {
+      // Add the sessionId to the wishlist
+      user.wishlistSessionIds.push(sessionId);
+      await user.save();
+      return res.status(200).json({ message: 'Session added to wishlist', isInWishlist: true });
+    }
+  } catch (error: any) {
+    console.error("Error updating wishlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while updating the wishlist." });
+  }
+};
+
+export const isSessionInWishlist = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id } = req.userData as IUserData;
+    const { sessionId } = req.body;
+
+    const user = await UserModel.findById(id); 
+
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    user.wishlistSessionIds = user.wishlistSessionIds || [];
+
+    // Check if the sessionId is in the wishlist
+    const isInWishlist = user.wishlistSessionIds.includes(sessionId);
+
+    if (isInWishlist) {
+      let wishlist = {sessionId: sessionId, isInWislist: true}
+      return res.status(200).json({ message: 'Session is in the wishlist', wishlist: wishlist });
+    } else {
+      let wishlist = {sessionId: sessionId, isInWislist: false}
+      return res.status(404).json({ message: 'Session is not in the wishlist', wishlist: wishlist });
+    }
+
+  } catch (error: any) {
+    console.error("Error checking wishlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while checking the wishlist." });
+  }
+};
+
+export const wishlistSessions = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id } = req.userData as IUserData; 
+    const { sessionId } = req.body;
+
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    const wishlistSessionIds = user?.wishlistSessionIds;
+
+    const sessions = await SessionModel.find()
+      .sort({ createdAt: -1 })
+      .populate({
+        path: 'instructorId',
+        select: 'firstName lastName',
+      });
+
+    const filteredSessions = await Promise.all(
+      sessions.map(async (session: any) => {
+        // Check if the session is in the user's wishlist
+        if (!wishlistSessionIds?.includes(session?._id.toString())) {
+          return null; // Skip this session if it's not in the wishlist
+        }
+
+        // Check if the session has a booking for this user
+        const booking = await BookingModel.findOne({
+          sessionId: session._id, 
+          studentId: id,
+        });
+
+        // Only return sessions where the status is not "booked" or is "completed" or "cancelled"
+        if (booking && booking.status === 'booked') {
+          return null; // Skip this session if it's still booked
+        }
+
+        // Return session if it's not booked or has a valid status
+        return session;
+      })
+    );
+
+    //  Filter out any null values from the result
+    const validSessions = filteredSessions.filter((session) => session !== null);
+
+    console.log("validSessions--", validSessions);
+    
+
+    //  Return the filtered sessions in the response
+    return res.status(HttpStatus.OK).json({
+      message: 'Sessions successfully fetched',
+      sessions: validSessions,
+    });
+
+  } catch (error: any) {
+    console.error('Error fetching wishlist:', error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'An error occurred while fetching the wishlist.',
+    });
+  }
+};

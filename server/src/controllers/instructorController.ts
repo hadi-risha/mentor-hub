@@ -3,10 +3,19 @@ import { UserService } from '../services/userService';
 import { uploadImageToS3, deleteImageFromS3 } from '../utils/s3Service';
 import { log } from 'winston';
 import config from '../config/config';
+import bcrypt from 'bcryptjs'; 
 import { HttpStatus } from '../utils/httpStatusCodes';
 import mongoose from 'mongoose';
 import { IInstructor, ISession } from '../models/sessionModel';
-import { IChat } from '../models/chatModel';
+import { ChatModel, IChat } from '../models/chatModel';
+// import { getReceiverSocketId, io } from '../utils/socket';
+import { IPost, PostModel } from '../models/postModel';
+import { UserModel } from '../models/userModel';
+import { MessageModel } from '../models/messageModel';
+import { AiChatModel } from '../models/aiChat';
+import { AiUserChatsModel } from '../models/aiUserChats';
+import { BookingModel } from '../models/bookingModel';
+
 
 
 
@@ -617,132 +626,716 @@ export const fetchNotifications = async (req: Request, res: Response): Promise<R
 }
 
 
-export const createMessage = async (req: Request, res: Response): Promise<Response> => {
+
+
+
+
+
+
+export const allMessages = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const messages = await MessageModel.find({ chat: req.params.chatId })
+      .populate("sender", "_id firstName lastName email image.url")
+      .populate("chat", "_id users latestMessage isGroupChat chatName groupAdmin");
+    
+    console.log("messages ---- all messages", messages);
+    
+    return res.status(HttpStatus.OK).json({ message: "All messages successfully fetched", messages: messages });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching all messages." });
+  }
+};
+
+export const sendMessage = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { content, chatId } = req.body;
+
+    if (!content || !chatId) {
+      console.log("Invalid data passed into request");
+      return res.status(400).json({ message: "Invalid data passed into request" });
+    }
+
+    const newMessage = {
+      sender: id,
+      content,
+      chat: chatId,
+    };
+
+    // Create the message
+    let message: any = await MessageModel.create(newMessage);
+
+    console.log("message in createMessage 1 :- ", message);
+    
+
+    if (!message) {
+      console.log("Message not found after creation");
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    message = await message.
+              populate("sender", "_id firstName lastName email image.url role")  // new message also has a sender so fetch all details
+
+    console.log("message (sender) in createMessage 2 :- ", message);
+
+
+    // Populate the chat details and nested users within chat
+    message = await message.populate({
+      path: "chat",
+      select: "_id users latestMessage isGroupChat chatName groupAdmin",
+      populate: {
+        path: "users",
+        select: "_id firstName lastName email image.url role",
+      },
+    });
+
+    console.log("message (chat), (chat.users) in createMessage 3 :- ", message);
+              
+    
+    await ChatModel.findByIdAndUpdate(chatId, { latestMessage: message });
+
+    return res
+      .status(HttpStatus.OK)
+      .json({ message: "Message successfully sent", messageData: message });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "An error occurred while sending the message." });
+  }
+};
+
+
+
+//select a specific user to chat from the search
+export const accessChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const  chatPartnerId  = req.body.userId;
+    console.log("Chat Partner ID:", chatPartnerId);
+
+    if (!chatPartnerId) {
+      console.log("Partner ID is missing");
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner ID is required to access chat." });
+    }
+
+    // Check if a chat already exists
+    const existingChats = await ChatModel.find({
+      isGroupChat: false,
+      $and: [
+        { users: { $elemMatch: { $eq: id } } },
+        { users: { $elemMatch: { $eq: chatPartnerId } } },
+      ],
+    })
+      .populate("users", "_id firstName lastName email image.url")
+      // .populate("latestMessage");
+
+      console.log("existingChats-------1", existingChats);
+      
+
+  //   let allInfo: IChatInfo[] = existingChats?.map(chat => ({
+  // _id: chat._id.toString(),
+  // users: chat.users.map(user => ({
+  //   _id: user._id,
+//     firstName: user.firstName,
+//     lastName: user.lastName,
+//     email: user.email,
+//     image: { url: user.image.url },
+//   })),
+//   latestMessage: {
+//     _id: chat.latestMessage._id,
+//     // sender: chat.latestMessage?.sender
+//     //   ? {
+//     //       _id: chat.latestMessage?.sender?._id,
+//     //       firstName: chat.latestMessage?.sender?.firstName,
+//     //       lastName: chat.latestMessage?.sender.lastName,
+//     //       email: chat.latestMessage.sender.email,
+//     //       image: { url: chat.latestMessage.sender.image.url },
+//     //     }
+//     //   : undefined,
+//   },
+//   isGroupChat: chat.isGroupChat,
+//   chatName: chat.chatName,
+// }));
+
+    // Populate last message sender details
+    const populatedChats = await UserModel.populate(existingChats, {
+      path: "latestMessage.sender",
+      select: "_id firstName lastName email image.url",
+    });
+
+    console.log("populatedChats---------==2", populatedChats);
+    
+
+    // Return existing chat if found
+    if (populatedChats.length > 0) {
+
+      console.log("populatedChats---3", populatedChats);
+      console.log("populatedChats[0]  4", populatedChats[0]);  //actually this is not only a single user detaiols , its the wole chat and user details of both users
+      
+      // return res.status(HttpStatus.OK).json({ message: "Chat found",existingChats: existingChats, chat: populatedChats[0] });
+       return res.status(HttpStatus.OK).json({ message: "Chat found", chat: populatedChats[0] });
+    }
+
+    // Create a new chat if no existing chat
+    const newChatData = {
+      chatName: "sender",
+      isGroupChat: false,
+      users: [id, chatPartnerId],
+    };
+
+    const createdChat = await ChatModel.create(newChatData);
+
+    console.log("createdChat in search", createdChat)
+    const fullChat = await ChatModel.findOne({ _id: createdChat._id })
+    .populate(
+      "users", 
+      "_id firstName lastName email image.url"
+    )
+
+    console.log("fullchat in accessacht 5", fullChat)
+
+    return res.status(HttpStatus.CREATED).json({ message: "New chat created successfully", chat: fullChat });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while accessing or creating the chat." });
+  }
+};
+
+
+export const createGroupChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    console.log("in group chat create");
+    
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    if (!req.body.name) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill the name" });
+    }
+
+    // with or without students create a group(in instructor side)
+    if (!req.body.users) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill all the feilds" });
+    }
+    console.log("req.body.name, req.body.users", req.body.name, req.body.users);
+
+    var users = JSON.parse(req.body.users);
+
+    if (users.length < 2) {
+      console.log("need more than 2 users");
+      
+      return res
+        .status(400)
+        .send("More than 2 users are required to form a group chat");
+    }else{
+      console.log("yey more than 2 users there");
+      
+    }
+
+    users.push(id);
+
+    const groupChat = await ChatModel.create({
+      chatName: req.body.name,
+      users: users,
+      isGroupChat: true,
+      groupAdmin: id,
+    });
+    console.log("groupChat created", groupChat);
+    
+
+    const fullGroupChat = await ChatModel.findOne({ _id: groupChat._id })
+      .populate("users", "_id firstName lastName email image.url")
+      .populate("groupAdmin", "_id firstName lastName email image.url");
+
+      console.log("fullGroupChat--", fullGroupChat);
+
+    
+    return res.status(HttpStatus.OK).json({ message: "Group chat created successfully", fullGroupChat });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while creating group chat." });
+  }
+};
+
+
+export const renameGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, chatName } = req.body;
+    if (!chatName) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: "Please Fill the name" });
+    }
+
+    const updatedChat = await ChatModel.findByIdAndUpdate(
+        chatId,
+      {
+        chatName: chatName,
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    console.log("updatedChat", updatedChat);
+    
+
+
+    if (!updatedChat) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    } 
+
+    return res.status(HttpStatus.OK).json({ message: "Group name updated successfully", updatedChat });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while updating community name." });
+  }
+};
+
+export const addToGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, userId } = req.body;
+
+    // check if the requester is admin
+
+    const added = await ChatModel.findByIdAndUpdate(
+      chatId,
+      {
+        $push: { users: userId },
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    if (!added) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    }
+
+    return res.status(HttpStatus.OK).json({ message: "Successfully added user", added: added });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while adding user." });
+  }
+};
+
+export const removeFromGroup = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { chatId, userId } = req.body;
+
+    const removed = await ChatModel.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { users: userId },
+      },
+      {
+        new: true,
+      }
+    )
+    .populate("users", "_id firstName lastName email image.url")
+    .populate("groupAdmin", "_id firstName lastName email image.url");
+
+    if (!removed) {
+      res.status(HttpStatus.NOT_FOUND);
+      throw new Error("Chat Not Found");
+    }
+
+    return res.status(HttpStatus.OK).json({ message: "Successfully removed user from group", removed: removed });
+      
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while removing user from community." });
+  }
+};
+
+export const fetchChats = async (req: Request, res: Response): Promise<Response> => {
+  console.log("in fetchChats----------");
+
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    return ChatModel.find({ users: { $elemMatch: { $eq: id } } })
+      .populate("users", "_id firstName lastName email role image.url")
+      .populate("groupAdmin", "_id firstName lastName email role image.url")
+      .populate("latestMessage", "_id content createdAt")
+      .sort({ updatedAt: -1 })
+      .then(async (results: any) => {
+        results = await UserModel.populate(results, {
+          path: "latestMessage.sender",
+          select: "_id firstName lastName email role image.url",
+        });
+
+        console.log("populatedResults in fetchchats :- ", results);
+
+        return res.status(HttpStatus.OK).json({ message: "Chat list successfully fetched", chatList: results, });
+      })
+      .catch((error) => {
+        console.error("Error fetching chats:", error.message);
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          message: "An error occurred while accessing the chat list.",
+        });
+      });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "An error occurred while accessing the chat list.",
+    });
+  }
+};
+
+export const allUsers = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    console.log('searcch query for chat header', req.query.search)
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const keyword = req.query.search ? {
+        $or: [
+          { firstName: { $regex: req.query.search, $options: "i" } },
+          { lastName: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+    : {};
+    
+    const users = await UserModel.find(keyword).find({ _id: { $ne: id } });
+    console.log("users in allUsers------",users)
+    return res.status(HttpStatus.OK).json({ message: "All users successfully fetched", users: users });
+  } catch (error: any) {
+    console.error("Error accessing or creating chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching all users." });
+  }
+};
+
+
+
+
+
+
+
+
+
+export const createPost = async (req: Request, res: Response): Promise<Response> => {
+  console.log("***CREATE POST****");
+  const { description } = req.body;
+
+  const image = req.file;
+  console.log("post image:- ", image);
+
+  if (!description) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Description required' });
+  }
+  if ( !description.trim() ) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "Field cannot be empty" });
+  }
+  if (!image) {
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Cover image is required' });
+  }
+  
+  try {
+    const {id, role} = req.userData as IUserData;
+    console.log("id, role:- ", id, role);
+
+    const { url: imageUrl, key: imageKey } = await uploadImageToS3(image);
+    console.log(" image url from  s3:- ", imageUrl); 
+    console.log(" image key from  s3:- ", imageKey);
+
+    const existingInstructor = await userService.findUserById(id);
+    if (!existingInstructor) {
+      return res.status(HttpStatus.NOT_FOUND).json({ message: "Instructor doesn't exist, cannot create post" });
+    }
+
+    const post = await userService.createPost({
+      instructorId: new mongoose.Types.ObjectId(id),
+      description,
+      image: {
+        url: imageUrl,  
+        key: imageKey  
+      },
+    } as Partial<IPost>);
+
+      return res.status(HttpStatus.OK).json({ message: 'Post successfully created', post: post });
+  } catch (error:any) {
+      console.error("Error creating session profile:- ", error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while creating the session",error: error.message});
+  }
+};
+
+
+
+export const getFeedPosts = async (req: Request, res: Response): Promise<Response> => {
+  let token = req.header("Authorization"); 
+  const {id, role} = req.userData as IUserData;
+  console.log("id, role", id, role);
+  console.log("token ", token);
+  try {
+    const allPosts = await userService.fetchPosts()
+    console.log("allPosts : ", allPosts);
+    
+    return res.status(HttpStatus.OK).json({ message: "Posts fetched successfully", posts: allPosts });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching posts:" });
+  }
+}
+
+
+export const likePost = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {id, role} = req.userData as IUserData;
     console.log("id, role", id, role);
-    const { chatPartnerId, content  } = req.body;
-    console.log("chatPartnerId", chatPartnerId);
+
+    const { postId } = req.params;
+
+    // const post = await Post.findById(id);
+    // const post = await userService.findPostById(postId);
+    const post = await PostModel.findById(postId);
+
+    if (!post?.likes) {
+      throw new Error("Post likes are undefined");
+    }
+
+    const isLiked = post?.likes?.get(id);  //get - in Map, this method checks if the userId exists as a key
+    if (isLiked) {
+        post?.likes?.delete(id); //delete - in Map, removing like(or userid) from already liked post,
+    }else{
+        post?.likes?.set(id, true);  //userId is the key, true is the value 
+    }
+
+    // const newLikes: Record<string, boolean> = Object.fromEntries(post.likes.entries());
+    // const updatedPost = await userService.updatePostById(postId, newLikes);
+
+    const updatedPost = await PostModel.findByIdAndUpdate(
+        postId,
+        {likes: post.likes}, 
+        { new: true }  //if do not specify this option or set it to false, Mongoose will return the og document before the update.
+    ); 
+
+    return res.status(HttpStatus.OK).json({ message: "Chat List fetched successfully", updatedPost:updatedPost });
+  } catch (error) {
+    console.error("Error fetching chat:", error);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+  }
+}
+
+
+
+
+
+export const createAiChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    console.log("User ID and Role:", id, role);
+
+    const { text } = req.body;
+
+    console.log("textooooooooo", text);
     
-    
-    if (!chatPartnerId) {
-      console.log("Partner Id is missing");
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
-    }
 
-    if (!content) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Content is missing" });
-    }
+    const newChat = new AiChatModel({
+      userId: id,
+      history: [{ role: "user", parts: [{ text }] }],
+    });
 
-    const messageData = {
-      senderId: id,
-      receiverId: chatPartnerId,
-      content
-    }
-    const newMessage = await userService.createMessage(messageData);
-    if (!newMessage) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create message" });
-    }
+    console.log("newChat", newChat);
 
-    if (!newMessage._id) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Message creation failed: Invalid message ID" });
-    }
+    const savedChat = await newChat.save();
 
-    // const chatExist = await userService.findChatWithUserIds(id, chatPartnerId);
-    const chatExist: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
+     // CHECK IF THE USERCHATS EXISTS
+    const userChats = await AiUserChatsModel.find({ userId: id });
 
-
-    if (!chatExist) {
-      const chatData: Partial<IChat> = {
-        usersId: [id, chatPartnerId],
-        messageIds: [newMessage?._id.toString()], // Ensure string[]
-        lastMessageId: newMessage?._id.toString(), // Ensure string
-        unreadCounts: [
-          { userId: chatPartnerId, count: 1 },
-          { userId: id, count: 0 }, // Sender has no unread messages
-        ],
-      };
-
-      const newChat = await userService.createChat(chatData);
-      if (!newChat) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to create chat" });
-      }
-
-      return res.status(HttpStatus.CREATED).json({ message: "Chat & message created", chat: newChat });
-    }else {
-      const updateChatData = {
-        messageIds: [...(chatExist.messageIds || []), newMessage?._id.toString()],
-        lastMessageId: newMessage?._id.toString(),
-        unreadCounts: [
+    // IF DOESN'T EXIST CREATE A NEW ONE AND ADD THE CHAT IN THE CHATS ARRAY
+    if (!userChats.length) {
+      console.log("chats doenst exist so create a new chats");
+      
+      const newUserChats = new AiUserChatsModel({
+        userId: id,
+        chats: [
           {
-            userId: chatPartnerId,
-            count: chatExist?.unreadCounts?.find(u => u.userId === chatPartnerId)?.count ?? 0 + 1, // Using nullish coalescing for undefined
+            _id: savedChat._id,
+            title: text.substring(0, 40),
           },
-          { userId: id, count: 0 },
         ],
-      };
+      });
 
-      const updatedChat = await userService.updateChatMessages(
-        chatExist._id,
-        updateChatData
+      console.log("newUserChats", newUserChats);
+      
+
+      await newUserChats.save();
+      return res.status(HttpStatus.CREATED).json({ message: "New Ai chat created successfully", newChatId: savedChat._id });
+
+    }else {
+      console.log("chats already exist so push id to chats");
+      // IF EXISTS, PUSH THE CHAT TO THE EXISTING ARRAY
+      await AiUserChatsModel.updateOne(
+        { userId: id },
+        {
+          $push: {
+            chats: {
+              _id: savedChat._id,
+              title: text.substring(0, 40),
+            },
+          },
+        }
       );
 
-      if (!updatedChat) {
-        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Failed to update chat" });
-      }
-
-      return res.status(HttpStatus.OK).json({ message: "Message sent and chat updated", chat: updatedChat });
+      return res.status(HttpStatus.CREATED).json({ message: "New Ai chat created successfully",  newChatId: newChat._id});
     }
-  } catch (error) {
-    console.error("Error creating message:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error creating message" });
+  } catch (error: any) {
+    console.error("Error creating Ai chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while creating the AI chat." });
   }
-}
+};
 
-export const fetchChat = async (req: Request, res: Response): Promise<Response> => {
+export const fetchAiChatlist = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const {id, role} = req.userData as IUserData;
-    console.log("id, role", id, role);
+    const { id, role } = req.userData as IUserData;
 
-    // const { chatPartnerId  } = req.body;
-    const chatPartnerId = req.query.chatPartnerId as string;
-    if (!chatPartnerId) {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Partner Id is missing" });
-    }
-
-    const chat: IChat | null = await userService.findChatWithUserIds(id, chatPartnerId);
-    if (!chat) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
-    }
-
-    // Fetch all messages for the chat, sorted by timestamp 
-    const messages = await userService.fetchMessages(chat.messageIds);
-
-    console.log("chat messages of users-----", messages) 
-
-    return res.status(HttpStatus.OK).json({ message: "Chat fetched successfully", chat, messages });
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+    const userChats = await AiUserChatsModel.find({ userId: id });
+    return res.status(HttpStatus.OK).json({ message: "User Ai chat list fetched successfully",  userChats: userChats[0].chats});
+  } catch (error: any) {
+    console.error("Error fetching Ai chatlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching the AI chat list." });
   }
-}
+};
 
-
-export const fetchNavbarChatList = async (req: Request, res: Response): Promise<Response> => {
+export const fetchSingleChat = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const {id, role} = req.userData as IUserData;
-    console.log("id, role", id, role);
+    const { id, role } = req.userData as IUserData;
+    const chatId = req.params.id;
 
-    const chatList: IChat[] | null = await userService.fetchInteractedUsersList(id);
-    if (!chatList) {
-      return res.status(HttpStatus.NOT_FOUND).json({ message: "Chat not found" });
+    console.log("chatId----==", chatId);
+    
+    const chat = await AiChatModel.findOne({ _id: chatId, userId: id });
+    console.log("chat--------chat :-", chat);
+    
+    return res.status(HttpStatus.OK).json({ message: "User Ai chat fetched successfully",  chat: chat});
+
+  } catch (error: any) {
+    console.error("Error fetching Ai chat:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching the AI chat." });
+  }
+};
+
+
+
+export const updateExistingChat = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+    const chatId = req.params.id;
+    
+    console.log("chatId----==", chatId);
+
+    const { question, answer, img } = req.body;
+
+    console.log("question, answer, img", question, answer, img);
+    
+
+    const newItems = [
+      ...(question
+        ? [{ role: "user", parts: [{ text: question }], ...(img && { img }) }]
+        : []),
+      { role: "model", parts: [{ text: answer }] },
+    ];
+
+    const updatedChat = await AiChatModel.updateOne(
+      { _id: chatId, userId: id },
+      {
+        $push: {
+          history: {
+            $each: newItems,
+          },
+        },
+      },
+      { new: true } 
+    );
+
+    console.log("updatedChat-------- :-", updatedChat);
+    
+    return res.status(HttpStatus.OK).json({ message: "User Ai conversation added successfully",  updatedChat: updatedChat});
+
+  } catch (error: any) {
+    console.error("Error adding conversation:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while adding conversation." });
+  }
+};
+
+
+export const fetchWallet = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+
+    const walletData = await BookingModel.find({ instructorId: id })
+    .populate("studentId", "_id firstName lastName image.url")
+    .populate("sessionId", "fee")
+
+    console.log("bookings", walletData);
+    
+
+    return res.status(HttpStatus.OK).json({ message: "Wallet data fetched successfully",  walletData: walletData});
+  } catch (error: any) {
+    console.error("Error fetching Ai chatlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while fetching the wallet data." });
+  }
+};
+
+
+export const changePassword = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { id, role } = req.userData as IUserData;
+
+    // Destructure password and confirmPassword from the request body
+    const { password, confirmPassword } = req.body;
+
+    if (!password || !confirmPassword) {
+      return res.status(400).json({ message: 'Password and Confirm Password are required' });
     }
 
-    console.log("chatList navbar data--------", chatList);
-  
-    return res.status(HttpStatus.OK).json({ message: "Chat List fetched successfully", chatList, });
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "Error fetching chat:" });
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error: any) {
+    console.error("Error fetching Ai chatlist:", error.message);
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while reset password." });
   }
-}
+};

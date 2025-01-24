@@ -7,6 +7,7 @@ import { IRating } from '../models/ratingModel';
 import { INotification } from '../models/notificationModel';
 import { IChat } from '../models/chatModel';
 import { IMessage } from '../models/messageModel';
+import { IPost } from '../models/postModel';
 
 // import {IProfile} from '../models/userProfile'
 
@@ -136,28 +137,45 @@ export class UserService {
         return this.userRepository.fetchNotifications()
     }
 
-    async findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null> {
-        return this.userRepository.findChatWithUserIds(id, chatPartnerId)
+    // async findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null> {
+    //     return this.userRepository.findChatWithUserIds(id, chatPartnerId)
+    // }
+
+    // async createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null> {
+    //     return this.userRepository.createMessage(messageData)
+    // }
+
+    // async createChat( chatData: Partial<IChat> ): Promise<IChat | null> {
+    //     return this.userRepository.createChat(chatData)
+    // }
+
+    // async updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null> {
+    //     return this.userRepository.updateChatMessages(chatId, updateChatData )
+    // }
+
+    // async fetchMessages(messageIds: string[]): Promise<IMessage[] | null> {
+    //     return this.userRepository.fetchMessages(messageIds)
+    // }
+
+    // async fetchInteractedUsersList( id: string ): Promise<IChat[] | null> {
+    //     return this.userRepository.fetchInteractedUsersList(id )
+    // }
+
+
+    async createPost(postData: Partial<IPost>): Promise<IPost | null> {
+        return this.userRepository.createPost(postData)
     }
 
-    async createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null> {
-        return this.userRepository.createMessage(messageData)
+    async fetchPosts(): Promise<IPost[] | null> {
+        return this.userRepository.fetchPosts();
     }
 
-    async createChat( chatData: Partial<IChat> ): Promise<IChat | null> {
-        return this.userRepository.createChat(chatData)
+    async findPostById(id: string): Promise<IPost | null> {
+        return this.userRepository.findPostById(id);
     }
 
-    async updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null> {
-        return this.userRepository.updateChatMessages(chatId, updateChatData )
-    }
-
-    async fetchMessages(messageIds: string[]): Promise<IMessage[] | null> {
-        return this.userRepository.fetchMessages(messageIds)
-    }
-
-    async fetchInteractedUsersList( id: string ): Promise<IChat[] | null> {
-        return this.userRepository.fetchInteractedUsersList(id )
+    async updatePostById(id: string, newLikes: Record<string, boolean>): Promise<IPost | null> {
+        return this.userRepository.updatePostById(id, newLikes);
     }
 
 

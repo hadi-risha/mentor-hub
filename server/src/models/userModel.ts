@@ -29,6 +29,8 @@ export interface IUser extends Document {
   isRoleChanged: boolean;
 
   lastActive?: Date;
+
+  wishlistSessionIds?: string[];
 }
 
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -73,7 +75,6 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     default: null,
     required: false,
   },
-
   about: {
     type: String,
     required: false,
@@ -110,7 +111,6 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: {
       key: {
         type: String,
-        // required: true,
         required: false,
       },
       url: {
@@ -128,10 +128,16 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  lastActive: { 
+  lastActive: {
     type: Date, 
     default: Date.now 
   },
+
+  wishlistSessionIds: {
+    type: [String], // This will be an array of strings
+    default: [], // Initialize as an empty array by default
+  },
+
 } ,{timestamps:true});
 
 export const UserModel = mongoose.model<IUser>("User", userSchema);

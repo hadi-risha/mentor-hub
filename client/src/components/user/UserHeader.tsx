@@ -53,7 +53,13 @@ const Header = () => {
     async function fetchProfile() {
       try {
         const res = await axiosInstance.get(`/${userRole}/profile`);
-        const { email, role,  firstName, lastName, profilePicUrl } = res.data;
+        const { id, email, role,  firstName, lastName, profilePicUrl } = res.data;
+        console.log("id in header", id);
+
+        localStorage.setItem("userId", id);
+        localStorage.setItem("name", `${firstName} ${lastName}`);
+
+        
 
         setProfileData({
           email: email || '',
@@ -68,6 +74,10 @@ const Header = () => {
     }
     fetchProfile();
   }, []);
+
+
+  
+
 
   
   const handleDropdownToggle = () => {
@@ -400,6 +410,14 @@ const Header = () => {
         </li>
 
         <li className="flex items-center">
+          <a href={`/user/posts`}>
+            <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
+              <p className='text-black font-serif'>Posts</p>
+            </div>
+          </a>
+        </li>
+
+        <li className="flex items-center">
           <a href={`/user/chat`}>
             <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
               <p className='text-black font-serif'>Chat</p>
@@ -416,9 +434,9 @@ const Header = () => {
         </li>
 
         <li className="flex items-center">
-          <a href={`/${userRole}/community`}>
+          <a href={`/user/ai/dashboard`}>
             <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
-              <p className='text-black font-serif'>Community</p>
+              <p className='text-black font-serif'>Connect AI</p>
             </div>
           </a>
         </li>
@@ -432,6 +450,28 @@ const Header = () => {
             </a>
         </li>
         ): null}
+
+          {userRole === 'instructor'? (
+          <li className="flex items-center">
+            <a href='/instructor/wallet'>
+              <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
+                <p className='text-black font-serif'>Wallet</p>
+              </div>
+            </a>
+          </li>
+        ): null}
+
+        {userRole === 'student'? (
+          <li className="flex items-center">
+            <a href='/student/wishlist'>
+              <div className='w-auto h-auto py-1 px-3 rounded-full hover:bg-[#3ee1a6]'>
+                <p className='text-black font-serif'>Wishlist</p>
+              </div>
+            </a>
+          </li>
+        ): null}
+
+        
             
       </div>
 

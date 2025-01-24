@@ -22,20 +22,20 @@ const bookingSchema: Schema<IBooking> = new mongoose.Schema(
     },
     sessionId: {
         type: Schema.Types.ObjectId,
-        ref: "Session", // Reference to the Session collection
+        ref: "Session", 
         required: true,
     },
     instructorId: {
         type: Schema.Types.ObjectId,
-        ref: "User", // Reference to the instructor in the User collection
+        ref: "User", 
         required: true,
     },
     date: {
-        type: String, // Store the selected date (e.g., "2024-11-20")
+        type: String, 
         required: true,
     },
     timeSlot: {
-        type: String, // Store the selected time slot (e.g., "10:00 AM - 11:00 AM")
+        type: String, 
         required: true,
     },
     concerns: {

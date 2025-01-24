@@ -70,6 +70,7 @@ const NewAdminLogin = () => {
 
                     <button
                         type="submit"
+                        onClick={()=> handleLogin}
                         className="mt-5 w-full bg-[#5eb7b7] text-white px-11 py-4 rounded text-xs">
                         Log in
                     </button>

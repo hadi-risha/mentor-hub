@@ -5,6 +5,7 @@ import { IRating } from '../models/ratingModel';
 import { INotification } from '../models/notificationModel';
 import { IChat } from '../models/chatModel';
 import { IMessage } from '../models/messageModel';
+import { IPost } from '../models/postModel';
 
 
 
@@ -85,17 +86,35 @@ export interface IUserRepository {
   
   fetchNotifications(): Promise<INotification[] | null>;
 
-  findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null>;
 
-  createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null>;
 
-  createChat( chatData: Partial<IChat> ): Promise<IChat | null>;
 
-  updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null>;
+  // findChatWithUserIds(id: string, chatPartnerId: string): Promise<IChat | null>;
 
-  fetchMessages( messageIds: string[] ): Promise<IMessage[] | null>;
+  // createMessage( messageData: Partial<IMessage> ): Promise<IMessage | null>;
 
-  fetchInteractedUsersList( id: string ): Promise<IChat[] | null>;
+  // createChat( chatData: Partial<IChat> ): Promise<IChat | null>;
+
+  // updateChatMessages( chatId: string, updateChatData: Partial<IChat> ): Promise<IChat | null>;
+
+  // fetchMessages( messageIds: string[] ): Promise<IMessage[] | null>;
+
+  // fetchInteractedUsersList( id: string ): Promise<IChat[] | null>;
+
+
+  
+
+  createPost(postData: IPost): Promise<IPost | null>;
+
+
+  fetchPosts(): Promise<IPost[] | null>;
+
+  findPostById(id: string): Promise<IPost | null>;
+  updatePostById(id: string, newLikes: Record<string, boolean>): Promise<IPost | null>;
+
+
+
+
 
 
 

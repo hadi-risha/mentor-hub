@@ -125,7 +125,12 @@ const StudentProfile = () => {
                         <a href={"/student/session-history"}>
                             <p className='text-lg text-black font-serif'>Session History</p>
                         </a>
-                        <p className='text-lg text-black font-serif'>Posts</p>
+
+                        <a href={"/user/reset-password"}>
+                            <p className='text-lg text-black font-serif'>Reset Password</p>
+                        </a>
+
+                        
                     </div>
 
                     <div className='ml-auto mr-6'>

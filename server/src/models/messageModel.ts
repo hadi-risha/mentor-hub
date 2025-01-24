@@ -1,30 +1,42 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMessage extends Document {
-    _id: mongoose.Types.ObjectId; // Ensure _id is explicitly included
-    senderId: string; 
-    receiverId: string; 
+    _id: mongoose.Types.ObjectId; 
+    sender: string; 
+    readBy: string[]; 
     content: string;
-    reactions: { userId: string; type: string }[];
-    seen: boolean;
-    timestamp: Date;
+    chat: string; 
+
+    reactions?: {
+        userId: string;
+        type: string
+    }[];
+    seen?: boolean;
 }
 
 const MessageSchema: Schema = new Schema({
-    senderId: { 
+    sender: { 
         type: Schema.Types.ObjectId, 
         ref: 'User', 
         required: true 
     },
-    receiverId: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'User', 
-        required: true 
-    },
+    readBy: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true 
+        }
+    ],
     content: { 
         type: String, 
         required: true 
     },
+    chat: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+      trim: true,
+    },
+
     reactions: [
         {
         userId: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -35,10 +47,7 @@ const MessageSchema: Schema = new Schema({
         type: Boolean, 
         default: false 
     },
-    timestamp: { 
-        type: Date, 
-        default: Date.now 
-    },
-});
+    
+}, { timestamps: true });
 
 export const MessageModel = mongoose.model<IMessage>('Message', MessageSchema);
